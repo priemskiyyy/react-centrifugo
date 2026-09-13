@@ -1,47 +1,43 @@
-# Releasing react-centrifugo
+# Releasing the packages
 
-The runtime and codegen packages are versioned independently. This process publishes the runtime only. No npm package is published by a pull request, a push, or a verification run.
+The runtime and codegen packages are versioned independently. Each has its own GitHub release tag and publishing workflow. Pushes and verification runs do not publish npm packages.
 
-## Prepare
+| Package                    | Version file                             | GitHub release tag                    | Workflow              | Verified artifact directory  |
+| -------------------------- | ---------------------------------------- | ------------------------------------- | --------------------- | ---------------------------- |
+| `react-centrifugo`         | `packages/react-centrifugo/package.json` | `react-centrifugo-v<version>`         | `runtime.publish.yml` | `.artifacts/release`         |
+| `react-centrifugo-codegen` | `packages/codegen/package.json`          | `react-centrifugo-codegen-v<version>` | `codegen.publish.yml` | `.artifacts/codegen-release` |
 
-1. Update `packages/react-centrifugo/package.json` and `CHANGELOG.md` together. Use a prerelease version such as `0.1.0-beta.1` for a beta; a GitHub prerelease label does not change the npm version.
-2. Remove the first-release notices from the README and getting-started page when the initial version is ready to publish.
-3. Run `pnpm check:release` with Docker running. The browser suite uses a pinned Centrifugo image in Chromium, Firefox, and WebKit.
-4. Merge the reviewed commits into `main`, preserving the commit history. Verify GitHub Actions on that revision.
+## Prepare a release
 
-The checks produce `.artifacts/release/react-centrifugo-<version>.tgz` and `SHA256SUMS`. Compatibility checks install that tarball into clean consumers with the minimum and current React versions. The tests also verify nullable client types, typed events, SSR, and browser bundling.
+1. Update the selected package's version and its entry in `CHANGELOG.md` together. Use a version such as `0.2.0-beta.1` for a prerelease; the GitHub prerelease flag must match the version suffix.
+2. Run `pnpm check:release` with Docker running. The browser suite uses a pinned Centrifugo image in Chromium, Firefox, and WebKit.
+3. Merge the reviewed commits into `main`, preserving the commit history. Verify GitHub Actions on that revision.
+4. Create a GitHub release using the matching tag from the table. Mark prerelease versions as prereleases.
+5. Approve the publish job in the GitHub `npm` environment once its verification jobs pass.
 
-## First npm publication
+Each workflow builds and tests its package, then publishes the verified tarball with provenance after checking its checksum. Prereleases use the `next` dist-tag; stable releases use `latest`. Package verification installs tarballs into clean consumers and checks generated hooks, CLI commands, SSR, and browser bundling. Runtime compatibility checks also test the minimum and current React versions.
 
-The npm name must exist before configuring its trusted publisher. An npm maintainer must perform the first publication from the verified tarball, using their own npm authentication:
+Do not reuse a published version. Prepare a new patch version and changelog entry for a release fix.
+
+## npm trusted publishers
+
+Both packages use the GitHub owner `priemskiyyy`, repository `react-centrifugo`, and environment `npm`. Each package authorizes its own workflow filename from the table and permits `npm publish`.
+
+Trusted publishing uses GitHub's short-lived OIDC identity. The repository does not need an npm token secret. See [npm's setup instructions](https://docs.npmjs.com/trusted-publishers/).
+
+The first publication of a new package requires an authenticated npm maintainer because the package must exist before configuring its trusted publisher. Publish the verified tarball from its artifact directory, then register the workflow. Do not create a GitHub release for that same version afterward: its workflow would attempt to publish an existing version. An annotated Git tag can record the source revision without triggering publication.
 
 ```sh
+npm login
 cd .artifacts/release
 shasum -a 256 -c SHA256SUMS
-npm publish react-centrifugo-<version>.tgz --access public --tag next
+npm publish react-centrifugo-<version>.tgz --access public --tag latest
 ```
 
-Use `next` for a prerelease. Choose `latest` only for a stable release. The package name was available when release preparation began; availability is not a reservation.
-
-After the first publication, configure an npm trusted publisher for:
-
-- GitHub owner: `priemskiyyy`
-- Repository: `react-centrifugo`
-- Workflow filename: `runtime.publish.yml`
-- Environment: `npm`
-
-Use the GitHub `npm` environment to require maintainer review before publishing. Trusted publishing uses the workflow's short-lived identity; the repository does not need an npm token secret. See [npm's setup instructions](https://docs.npmjs.com/trusted-publishers/).
-
-## Subsequent publications
-
-Create a GitHub release with tag `react-centrifugo-v<version>` pointing at the reviewed commit. Mark prerelease versions as prereleases.
-
-The publishing workflow checks that the tag and package version match, runs the release checks, and uploads the verified tarball. The `npm` environment then gates publication. The publish job checks the artifact's checksum and publishes that exact tarball with provenance. Prereleases use the `next` dist-tag; stable releases use `latest`.
-
-Do not reuse a published version. If a release has a defect, prepare a new patch version and changelog entry.
+Use `.artifacts/codegen-release` and the codegen tarball for its first publication. Use `--tag next` for a prerelease.
 
 ## Support claims
 
-The browser suite exercises Chromium, Firefox, and WebKit with the pinned Centrifugo version in `tests/browser/server.mjs`. CI tests the minimum and current React versions. React Native device support remains unverified; do not describe it as tested until a device suite is added.
+The browser suite exercises Chromium, Firefox, and WebKit with the pinned Centrifugo version in `tests/browser/server.mjs`. CI tests the minimum and current React versions. React Native device support remains unverified.
 
 The lifecycle test checks socket, subscription, and listener cleanup across repeated cycles. It is not a heap benchmark or a claim of unlimited throughput.
