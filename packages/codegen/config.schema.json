@@ -1,0 +1,55 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$defs": {
+    "NonEmptyString": {
+      "type": "string",
+      "description": "a non empty string",
+      "title": "nonEmptyString",
+      "minLength": 1
+    }
+  },
+  "type": "object",
+  "required": ["events", "dispatcher", "output"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "events": {
+      "type": "object",
+      "required": ["file", "type"],
+      "properties": {
+        "file": { "$ref": "#/$defs/NonEmptyString" },
+        "type": {
+          "type": "string",
+          "description": "a string matching the pattern ^[A-Za-z_$][A-Za-z0-9_$]*$",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "dispatcher": {
+      "type": "object",
+      "required": ["file", "export"],
+      "properties": {
+        "file": { "$ref": "#/$defs/NonEmptyString" },
+        "export": {
+          "type": "string",
+          "description": "a string matching the pattern ^[A-Za-z_$][A-Za-z0-9_$]*$",
+          "pattern": "^[A-Za-z_$][A-Za-z0-9_$]*$"
+        }
+      },
+      "additionalProperties": false
+    },
+    "output": { "$ref": "#/$defs/NonEmptyString" },
+    "tsconfig": { "$ref": "#/$defs/NonEmptyString" },
+    "hookNames": {
+      "type": "object",
+      "required": [],
+      "properties": {},
+      "additionalProperties": {
+        "type": "string",
+        "description": "a string matching the pattern ^use[A-Z][a-zA-Z0-9]*$",
+        "pattern": "^use[A-Z][a-zA-Z0-9]*$"
+      }
+    }
+  },
+  "additionalProperties": false
+}
