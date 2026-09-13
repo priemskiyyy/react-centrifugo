@@ -46,5 +46,17 @@
     "@effect/cli": "0.77.1",
     "@effect/platform-node": "0.108.2",
     "effect": "3.22.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priemskiyyy/react-centrifugo.git",
+    "directory": "packages/codegen"
+  },
+  "homepage": "https://priemskiyyy.github.io/react-centrifugo/codegen",
+  "bugs": {
+    "url": "https://github.com/priemskiyyy/react-centrifugo/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
