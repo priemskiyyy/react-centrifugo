@@ -1,5 +1,9 @@
 # Changelog
 
+## react-centrifugo-codegen 0.1.1 — 2026-09-13
+
+- Fix the documentation link in the npm README.
+
 ## react-centrifugo 0.1.0 — 2026-09-13
 
 - Provider-managed sessions with shared channel subscriptions and cleanup.

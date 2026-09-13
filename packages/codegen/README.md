@@ -2,7 +2,7 @@
 
 Generate named React hooks from a finite TypeScript event map. Effect handles command parsing, config validation, and scoped watcher cleanup. The TypeScript compiler resolves imported and composed types; generation does not execute your application modules.
 
-[Full documentation](../../docs/README.md)
+[Full documentation](https://priemskiyyy.github.io/react-centrifugo/codegen)
 
 ## Setup
 
