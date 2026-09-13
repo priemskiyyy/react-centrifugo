@@ -1,0 +1,52 @@
+name: example-test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/actions/setup/**"
+      - ".github/workflows/example.test.yml"
+      - "examples/react/**"
+      - "packages/**"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/actions/setup/**"
+      - ".github/workflows/example.test.yml"
+      - "examples/react/**"
+      - "packages/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+
+      - name: Build packages
+        run: pnpm build
+
+      - name: Generated hooks are current
+        working-directory: examples/react
+        run: pnpm validate:generated
+
+      - name: Linting Typescript
+        working-directory: examples/react
+        run: pnpm lint:typescript
+
+      - name: Build static export
+        working-directory: examples/react
+        run: pnpm build

@@ -1,0 +1,71 @@
+name: library-test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "eslint.config.js"
+      - "vitest.config.ts"
+      - ".github/actions/setup/**"
+      - ".github/workflows/library.test.yml"
+      - "packages/react-centrifugo/**"
+  push:
+    branches:
+      - "main"
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "tsconfig.json"
+      - "eslint.config.js"
+      - "vitest.config.ts"
+      - ".github/actions/setup/**"
+      - ".github/workflows/library.test.yml"
+      - "packages/react-centrifugo/**"
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: packages/react-centrifugo
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - node: "22.18.0"
+            react: "19.2.0"
+          - node: "24"
+            react: "19.2.8"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+        with:
+          node-version: ${{ matrix.node }}
+
+      - name: Install peer versions under test
+        working-directory: .
+        run: pnpm add -Dw --ignore-scripts react@${{ matrix.react }} react-dom@${{ matrix.react }}
+
+      - name: Linting Typescript
+        run: pnpm lint:typescript
+
+      - name: Linting Eslint
+        run: pnpm lint:eslint
+
+      - name: Unit tests
+        run: pnpm test:unit
+
+      - name: Build
+        run: pnpm build
