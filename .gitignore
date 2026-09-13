@@ -1,0 +1,12 @@
+node_modules/
+.idea/
+.DS_Store
+.env
+.env.*
+!.env.example
+dist/
+coverage/
+.artifacts/
+*.tgz
+docs/.vitepress/dist/
+docs/.vitepress/cache/
