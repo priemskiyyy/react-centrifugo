@@ -152,7 +152,7 @@ try {
       "-p",
       "127.0.0.1:4175:8000",
       "-v",
-      `${directory}:/centrifugo:ro`,
+      `${path.join(directory, "config.json")}:/centrifugo/config.json:ro`,
       image,
       "centrifugo",
       "-c",
