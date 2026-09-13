@@ -1,0 +1,35 @@
+name: runtime-release-verify
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "packages/react-centrifugo/**"
+      - "scripts/verify-runtime-package.mjs"
+      - "scripts/verify-release.mjs"
+      - "CHANGELOG.md"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/workflows/runtime.verify.yml"
+      - ".github/actions/setup/**"
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm verify:release
+      - run: pnpm test:compatibility
+      - uses: actions/upload-artifact@v4
+        with:
+          name: runtime-release
+          path: .artifacts/release/
+          if-no-files-found: error
+          retention-days: 14

@@ -1,0 +1,50 @@
+name: browser-test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.json"
+      - "packages/react-centrifugo/**"
+      - "tests/browser/**"
+      - ".github/actions/setup/**"
+      - ".github/workflows/browser.test.yml"
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.json"
+      - "packages/react-centrifugo/**"
+      - "tests/browser/**"
+      - ".github/actions/setup/**"
+      - ".github/workflows/browser.test.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        browser: [chromium, firefox, webkit]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup
+      - run: pnpm exec playwright install --with-deps ${{ matrix.browser }}
+      - run: pnpm test:browser --project ${{ matrix.browser }}
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: browser-results-${{ matrix.browser }}
+          path: .artifacts/browser-results
+          retention-days: 7
