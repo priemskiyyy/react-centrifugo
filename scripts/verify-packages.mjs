@@ -207,10 +207,11 @@ const html = renderToString(createElement(CentrifugeProvider, { configuration: {
 assert.equal(html, "<span>disconnected</span>");\n`,
   );
 
-  const cli = path.join(
-    consumer,
-    "node_modules/react-centrifugo-codegen/dist/cli.mjs",
+  const codegen = path.join(consumer, "node_modules/react-centrifugo-codegen");
+  const metadata = JSON.parse(
+    readFileSync(path.join(codegen, "package.json"), "utf8"),
   );
+  const cli = path.join(codegen, metadata.bin["react-centrifugo-codegen"]);
   const stale = spawnSync(process.execPath, [cli, "check"], {
     cwd: consumer,
     encoding: "utf8",
