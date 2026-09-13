@@ -12,6 +12,12 @@ export default withMermaid(
     title: "React Centrifugo",
     description:
       "React hooks for Centrifugo with shared subscriptions, optional parsing, and typed generated event hooks.",
+    head: [
+      [
+        "link",
+        { rel: "icon", type: "image/svg+xml", href: `${base}favicon.svg` },
+      ],
+    ],
     // README.md is the GitHub-facing index; index.md is the site home.
     srcExclude: ["README.md"],
     cleanUrls: true,
@@ -22,6 +28,7 @@ export default withMermaid(
       optimizeDeps: { include: ["mermaid", "lodash-es"] },
     },
     themeConfig: {
+      logo: { src: "/favicon.svg", alt: "" },
       socialLinks: [
         {
           icon: "github",
