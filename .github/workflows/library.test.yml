@@ -56,7 +56,9 @@ jobs:
 
       - name: Install peer versions under test
         working-directory: .
-        run: pnpm add -Dw --ignore-scripts react@${{ matrix.react }} react-dom@${{ matrix.react }}
+        run: |
+          pnpm add -Dw --ignore-scripts react@${{ matrix.react }} react-dom@${{ matrix.react }}
+          pnpm --filter react-centrifugo add -D --ignore-scripts react@${{ matrix.react }}
 
       - name: Linting Typescript
         run: pnpm lint:typescript
