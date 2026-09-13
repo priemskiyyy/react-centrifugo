@@ -1,0 +1,10 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "react-centrifugo": ["../../packages/react-centrifugo/dist/index.d.ts"]
+    }
+  },
+  "include": ["**/*.ts", "**/*.tsx"]
+}
