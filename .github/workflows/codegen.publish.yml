@@ -1,0 +1,62 @@
+name: codegen-publish
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  metadata:
+    if: startsWith(github.event.release.tag_name, 'react-centrifugo-codegen-v')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: node scripts/verify-release.mjs react-centrifugo-codegen
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_PRERELEASE: ${{ github.event.release.prerelease }}
+  codegen:
+    needs: metadata
+    uses: ./.github/workflows/codegen.test.yml
+  example:
+    needs: metadata
+    uses: ./.github/workflows/example.test.yml
+  docs:
+    needs: metadata
+    uses: ./.github/workflows/docs.test.yml
+  format:
+    needs: metadata
+    uses: ./.github/workflows/common.format.yml
+  package:
+    needs: metadata
+    uses: ./.github/workflows/packages.verify.yml
+  publish:
+    needs: [codegen, example, docs, format, package]
+    runs-on: ubuntu-latest
+    environment: npm
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+      - uses: actions/download-artifact@v4
+        with:
+          name: codegen-release
+          path: release
+      - name: Publish the verified package
+        working-directory: release
+        env:
+          NPM_TAG: ${{ github.event.release.prerelease && 'next' || 'latest' }}
+        run: |
+          sha256sum --check SHA256SUMS
+          npm publish react-centrifugo-codegen-*.tgz --access public --provenance --tag "$NPM_TAG"

@@ -44,3 +44,11 @@ jobs:
       # bundling, CLI drift detection, and watcher shutdown.
       - name: Packaged consumer
         run: pnpm test:package
+
+      - name: Upload verified codegen package
+        uses: actions/upload-artifact@v4
+        with:
+          name: codegen-release
+          path: .artifacts/codegen-release/
+          if-no-files-found: error
+          retention-days: 14

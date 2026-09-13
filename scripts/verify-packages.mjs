@@ -1,6 +1,8 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import {
+  copyFileSync,
   mkdirSync,
   mkdtempSync,
   readFileSync,
@@ -14,6 +16,7 @@ import { fileURLToPath } from "node:url";
 
 const workspace = fileURLToPath(new URL("..", import.meta.url));
 const artifacts = path.join(workspace, ".artifacts");
+const release = path.join(artifacts, "codegen-release");
 const consumer = mkdtempSync(path.join(tmpdir(), "react-centrifugo-consumer-"));
 const rootPackage = JSON.parse(
   readFileSync(path.join(workspace, "package.json"), "utf8"),
@@ -89,6 +92,7 @@ const verifyWatchShutdown = (cli) =>
 
 try {
   mkdirSync(artifacts, { recursive: true });
+  rmSync(release, { recursive: true, force: true });
   const tarballs = ["react-centrifugo", "codegen"].map((directory) => {
     const packageDirectory = path.join(workspace, "packages", directory);
     process.stdout.write(
@@ -104,6 +108,10 @@ try {
     assert(packed.files.some((file) => file.path === "README.md"));
     assert(packed.files.some((file) => file.path === "LICENSE"));
     assert(!packed.files.some((file) => file.path.startsWith("src/")));
+    assert.equal(
+      packed.name,
+      directory === "codegen" ? "react-centrifugo-codegen" : directory,
+    );
     return path.join(artifacts, packed.filename);
   });
 
@@ -236,6 +244,14 @@ assert.equal(html, "<span>disconnected</span>");\n`,
   run(process.execPath, ["ssr.mjs"]);
   run(process.execPath, ["node_modules/vite/bin/vite.js", "build"]);
   await verifyWatchShutdown(cli);
+  const filename = `${metadata.name}-${metadata.version}.tgz`;
+  const tarball = path.join(artifacts, filename);
+  const checksum = createHash("sha256")
+    .update(readFileSync(tarball))
+    .digest("hex");
+  mkdirSync(release, { recursive: true });
+  copyFileSync(tarball, path.join(release, filename));
+  writeFileSync(path.join(release, "SHA256SUMS"), `${checksum}  ${filename}\n`);
   process.stdout.write(
     "Packed consumer passed: imports, generated types, SSR, browser build, CLI drift detection, and watcher shutdown.\n",
   );
