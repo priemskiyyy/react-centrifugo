@@ -6,8 +6,6 @@ Generate named React hooks from a finite TypeScript event map. Effect handles co
 
 ## Setup
 
-After publication:
-
 ```sh
 pnpm add -D react-centrifugo-codegen typescript
 ```

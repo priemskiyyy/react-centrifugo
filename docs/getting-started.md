@@ -9,9 +9,6 @@ pnpm add react-centrifugo centrifuge react
 Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`. Both are peer
 dependencies. The package is ESM with TypeScript declarations.
 
-The first npm release is being prepared. Until it is published, use the local
-workspace or a package tarball built from the repository.
-
 ## Mount the provider
 
 Mount a provider above components that use realtime hooks. Hooks used outside

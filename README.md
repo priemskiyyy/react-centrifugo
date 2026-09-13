@@ -2,11 +2,9 @@
 
 React hooks for [Centrifugo](https://centrifugal.dev/). Components listening to the same channel share a subscription. The provider handles connection ownership and cleanup; hooks expose publications, typed events, and connection state.
 
-The first npm release is being prepared. Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`.
+Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`.
 
 ## Usage
-
-After publication:
 
 ```sh
 pnpm add react-centrifugo centrifuge react

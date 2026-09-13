@@ -6,8 +6,6 @@ React hooks for Centrifugo. One provider owns a client; consumers of the same ch
 
 ## Installation
 
-After publication:
-
 ```sh
 pnpm add react-centrifugo centrifuge react
 ```
