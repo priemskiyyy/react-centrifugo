@@ -1,0 +1,19 @@
+packages:
+  - packages/*
+  - examples/*
+
+allowBuilds:
+  "@parcel/watcher": false
+  esbuild: true
+  msgpackr-extract: false
+  protobufjs: false
+
+# Mermaid's dependencies are listed in the VitePress plugin's optimizeDeps, which
+# Vite resolves from the workspace root. Hoist just those so the docs dev server
+# can pre-bundle them.
+publicHoistPattern:
+  - "@braintree/sanitize-url"
+  - cytoscape
+  - cytoscape-cose-bilkent
+  - dayjs
+  - debug

@@ -1,0 +1,52 @@
+{
+  "name": "react-centrifugo",
+  "version": "0.1.0",
+  "description": "Typed React hooks for Centrifugo, with shared subscriptions and generated event hooks.",
+  "type": "module",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/priemskiyyy/react-centrifugo.git",
+    "directory": "packages/react-centrifugo"
+  },
+  "homepage": "https://priemskiyyy.github.io/react-centrifugo/",
+  "bugs": {
+    "url": "https://github.com/priemskiyyy/react-centrifugo/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsdown",
+    "lint:typescript": "tsc --noEmit -p .",
+    "lint:eslint": "eslint src",
+    "test:unit": "vitest run --root ../.. --project react-centrifugo"
+  },
+  "peerDependencies": {
+    "centrifuge": ">=5.7.2 <6",
+    "react": ">=19.2.0 <20"
+  },
+  "keywords": [
+    "react",
+    "react-native",
+    "centrifugo",
+    "centrifuge",
+    "hooks",
+    "websocket",
+    "typescript"
+  ]
+}

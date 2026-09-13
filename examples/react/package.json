@@ -1,0 +1,21 @@
+{
+  "name": "example-react",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "generate:hooks": "react-centrifugo-codegen generate",
+    "validate:generated": "react-centrifugo-codegen check",
+    "lint:typescript": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "centrifuge": "5.7.2",
+    "react": "19.2.8",
+    "react-dom": "19.2.8",
+    "react-centrifugo": "workspace:*"
+  },
+  "devDependencies": {
+    "react-centrifugo-codegen": "workspace:*"
+  }
+}
