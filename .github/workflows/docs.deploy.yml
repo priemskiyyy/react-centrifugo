@@ -1,0 +1,56 @@
+name: docs-deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "main"
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/actions/setup/**"
+      - ".github/workflows/docs.deploy.yml"
+      - "docs/**"
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Let a running deployment finish; queue at most one more behind it.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Build documentation
+        run: pnpm build:docs
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/.vitepress/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

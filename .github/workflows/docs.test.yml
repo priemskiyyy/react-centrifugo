@@ -1,0 +1,31 @@
+name: docs-test
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - ".github/actions/setup/**"
+      - ".github/workflows/docs.test.yml"
+      - "docs/**"
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Setup workspace
+        uses: ./.github/actions/setup
+
+      # VitePress fails the build on dead internal links, so this doubles as a
+      # link check for every page.
+      - name: Build documentation
+        run: pnpm build:docs
