@@ -1,6 +1,10 @@
 # Devtools
 
-The experimental `react-centrifugo-devtools` package shows connection state, channel registrations, and an event timeline. It is available in the repository workspace alongside the unreleased runtime 0.2.0.
+The `react-centrifugo-devtools` package shows connection state, channel registrations, and an event timeline. Install it as a development dependency next to `react-centrifugo` 0.2 or later.
+
+```sh
+pnpm add -D react-centrifugo-devtools
+```
 
 ```tsx
 import { CentrifugeProvider } from "react-centrifugo";

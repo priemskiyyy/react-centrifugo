@@ -70,7 +70,7 @@ export default withMermaid(
             { text: "Configuration", link: "/configuration" },
             { text: "Typed events", link: "/typed-events" },
             { text: "Code generation", link: "/codegen" },
-            { text: "Devtools (experimental)", link: "/devtools" },
+            { text: "Devtools", link: "/devtools" },
             { text: "Server rendering", link: "/server-rendering" },
             { text: "Errors and recovery", link: "/error-handling" },
           ],

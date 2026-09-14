@@ -2,7 +2,9 @@
 
 Inspect React Centrifugo connections, channels, and publications in your browser.
 
-This package is being developed alongside `react-centrifugo@0.2.0`. It is available in this repository's workspace and has not been published to npm yet.
+```sh
+pnpm add -D react-centrifugo-devtools
+```
 
 ## Usage
 

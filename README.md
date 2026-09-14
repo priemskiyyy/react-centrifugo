@@ -64,11 +64,11 @@ The optional `react-centrifugo-codegen` package generates named hooks such as `u
 
 ## Packages
 
-| Package                     | Directory                                                            |
-| --------------------------- | -------------------------------------------------------------------- |
-| `react-centrifugo`          | [Runtime and React hooks](packages/react-centrifugo)                 |
-| `react-centrifugo-codegen`  | [Optional code generation CLI](packages/codegen)                     |
-| `react-centrifugo-devtools` | [Experimental browser inspector (workspace only)](packages/devtools) |
+| Package                     | Directory                                            |
+| --------------------------- | ---------------------------------------------------- |
+| `react-centrifugo`          | [Runtime and React hooks](packages/react-centrifugo) |
+| `react-centrifugo-codegen`  | [Optional code generation CLI](packages/codegen)     |
+| `react-centrifugo-devtools` | [Browser devtools panel](packages/devtools)          |
 
 The runtime is ESM and has no React DOM or Effect dependency. React Native device support remains unverified. See [server rendering and platform support](docs/server-rendering.md).
 

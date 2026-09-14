@@ -1,17 +1,18 @@
 # Releasing the packages
 
-The runtime and codegen packages are versioned independently. Each has its own GitHub release tag and publishing workflow. Pushes and verification runs do not publish npm packages.
+The three packages share one version line. Each has its own GitHub release tag and publishing workflow. Pushes and verification runs do not publish npm packages.
 
-The devtools package and runtime 0.2.0 are currently unreleased. Devtools is covered by package and browser checks, but has no publishing workflow or npm trusted publisher yet. Prepare its initial publication separately when the API is ready.
+| Package                     | Version file                             | GitHub release tag                     | Workflow               | Verified artifact directory   |
+| --------------------------- | ---------------------------------------- | -------------------------------------- | ---------------------- | ----------------------------- |
+| `react-centrifugo`          | `packages/react-centrifugo/package.json` | `react-centrifugo-v<version>`          | `runtime.publish.yml`  | `.artifacts/release`          |
+| `react-centrifugo-codegen`  | `packages/codegen/package.json`          | `react-centrifugo-codegen-v<version>`  | `codegen.publish.yml`  | `.artifacts/codegen-release`  |
+| `react-centrifugo-devtools` | `packages/devtools/package.json`         | `react-centrifugo-devtools-v<version>` | `devtools.publish.yml` | `.artifacts/devtools-release` |
 
-| Package                    | Version file                             | GitHub release tag                    | Workflow              | Verified artifact directory  |
-| -------------------------- | ---------------------------------------- | ------------------------------------- | --------------------- | ---------------------------- |
-| `react-centrifugo`         | `packages/react-centrifugo/package.json` | `react-centrifugo-v<version>`         | `runtime.publish.yml` | `.artifacts/release`         |
-| `react-centrifugo-codegen` | `packages/codegen/package.json`          | `react-centrifugo-codegen-v<version>` | `codegen.publish.yml` | `.artifacts/codegen-release` |
+Publish the runtime before devtools; devtools declares the matching runtime minor as a peer dependency.
 
 ## Prepare a release
 
-1. Update the selected package's version and its entry in `CHANGELOG.md` together. Use a version such as `0.2.0-beta.1` for a prerelease; the GitHub prerelease flag must match the version suffix.
+1. Update the package versions and their entries in `CHANGELOG.md` together. Use a version such as `0.2.0-beta.1` for a prerelease; the GitHub prerelease flag must match the version suffix.
 2. Run `pnpm check:release` with Docker running. The browser suite uses a pinned Centrifugo image in Chromium, Firefox, and WebKit.
 3. Merge the reviewed commits into `main`, preserving the commit history. Verify GitHub Actions on that revision.
 4. Create a GitHub release using the matching tag from the table. Mark prerelease versions as prereleases.
@@ -23,7 +24,7 @@ Do not reuse a published version. Prepare a new patch version and changelog entr
 
 ## npm trusted publishers
 
-Both packages use the GitHub owner `priemskiyyy`, repository `react-centrifugo`, and environment `npm`. Each package authorizes its own workflow filename from the table and permits `npm publish`.
+All packages use the GitHub owner `priemskiyyy`, repository `react-centrifugo`, and environment `npm`. Each package authorizes its own workflow filename from the table and permits `npm publish`.
 
 Trusted publishing uses GitHub's short-lived OIDC identity. The repository does not need an npm token secret. See [npm's setup instructions](https://docs.npmjs.com/trusted-publishers/).
 
@@ -36,7 +37,7 @@ shasum -a 256 -c SHA256SUMS
 npm publish react-centrifugo-<version>.tgz --access public --tag latest
 ```
 
-Use `.artifacts/codegen-release` and the codegen tarball for its first publication. Use `--tag next` for a prerelease.
+Use `.artifacts/codegen-release` or `.artifacts/devtools-release` and the matching tarball for that package's first publication. Use `--tag next` for a prerelease.
 
 ## Support claims
 

@@ -15,7 +15,7 @@ same channel shares a single subscription.
 | [Hooks](hooks.md)                        | Reference for every exported hook and type                             |
 | [Typed events](typed-events.md)          | Event maps, decoders, and one subscription per channel                 |
 | [Code generation](codegen.md)            | The optional CLI that turns an event map into named hooks              |
-| [Devtools](devtools.md)                  | The experimental channel inspector and event timeline                  |
+| [Devtools](devtools.md)                  | The channel inspector and event timeline                               |
 | [Server rendering](server-rendering.md)  | SSR, React Server Components, hydration, React Native                  |
 | [Errors and recovery](error-handling.md) | Where failures surface, reconnects, and recovering missed publications |
 
@@ -30,4 +30,4 @@ Design notes for contributors, not API documentation.
 
 - `react-centrifugo`: the runtime. React `>=19.2 <20`, Centrifuge JS `>=5.7.2 <6`, both peer dependencies.
 - `react-centrifugo-codegen`: optional. Node `>=22.18`, TypeScript `>=5.8 <6`.
-- `react-centrifugo-devtools`: experimental browser panel, available in the workspace with runtime 0.2.0.
+- `react-centrifugo-devtools`: optional. React `>=19.2 <20`, `react-centrifugo` `>=0.2.0 <0.3`.
