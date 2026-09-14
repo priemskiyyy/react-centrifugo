@@ -1,6 +1,6 @@
 {
   "name": "react-centrifugo-codegen",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "Generate typed event hooks for react-centrifugo from your TypeScript event map.",
   "type": "module",
   "license": "MIT",
