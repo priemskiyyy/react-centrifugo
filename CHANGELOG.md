@@ -1,5 +1,20 @@
 # Changelog
 
+## react-centrifugo 0.2.0 — Unreleased
+
+- Add a passive diagnostics bridge through `react-centrifugo/devtools` for connection, channel, and event inspection.
+- Mark react-centrifugo's own session and channel lifecycle events with `source: "runtime"`.
+
+## react-centrifugo-devtools 0.1.0 — Unreleased
+
+- Inspect sessions, channel status, errors, and listener counts in a floating panel.
+- Record a bounded event timeline with filtering, pause, clear, and optional payload capture.
+- Observe existing subscriptions without creating or retaining them.
+- Summarize each row inline and colour rows by kind: errors, publications, SDK lifecycle, and runtime events.
+- Highlight unexpected disconnects and errors, and turn the collapsed launcher red when one arrives.
+- Copy expanded contexts, search payload text, and keep connection events visible while a channel is selected.
+- Show local time in rows with the UTC value on hover; clamp `maxEvents` instead of throwing.
+
 ## react-centrifugo-codegen 0.1.1 — 2026-09-13
 
 - Fix the documentation link in the npm README.
