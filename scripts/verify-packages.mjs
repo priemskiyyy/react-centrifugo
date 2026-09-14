@@ -17,7 +17,27 @@ import { fileURLToPath } from "node:url";
 
 const workspace = fileURLToPath(new URL("..", import.meta.url));
 const artifacts = path.join(workspace, ".artifacts");
-const release = path.join(artifacts, "codegen-release");
+
+// Copies a packed tarball with its checksum into the directory a publish
+// workflow uploads as the release artifact.
+const stageRelease = (packageDirectory, releaseDirectory) => {
+  const metadata = JSON.parse(
+    readFileSync(
+      path.join(workspace, "packages", packageDirectory, "package.json"),
+      "utf8",
+    ),
+  );
+  const filename = `${metadata.name}-${metadata.version}.tgz`;
+  const tarball = path.join(artifacts, filename);
+  const checksum = createHash("sha256")
+    .update(readFileSync(tarball))
+    .digest("hex");
+  const release = path.join(artifacts, releaseDirectory);
+  rmSync(release, { recursive: true, force: true });
+  mkdirSync(release, { recursive: true });
+  copyFileSync(tarball, path.join(release, filename));
+  writeFileSync(path.join(release, "SHA256SUMS"), `${checksum}  ${filename}\n`);
+};
 const consumer = mkdtempSync(path.join(tmpdir(), "react-centrifugo-consumer-"));
 const rootPackage = JSON.parse(
   readFileSync(path.join(workspace, "package.json"), "utf8"),
@@ -93,7 +113,6 @@ const verifyWatchShutdown = (cli) =>
 
 try {
   mkdirSync(artifacts, { recursive: true });
-  rmSync(release, { recursive: true, force: true });
   const names = {
     "react-centrifugo": "react-centrifugo",
     codegen: "react-centrifugo-codegen",
@@ -263,14 +282,8 @@ assert.match(inspected, /Waiting for events/);\n`,
     /rc-devtools|Capture payloads|Circular or repeated reference/,
   );
   await verifyWatchShutdown(cli);
-  const filename = `${metadata.name}-${metadata.version}.tgz`;
-  const tarball = path.join(artifacts, filename);
-  const checksum = createHash("sha256")
-    .update(readFileSync(tarball))
-    .digest("hex");
-  mkdirSync(release, { recursive: true });
-  copyFileSync(tarball, path.join(release, filename));
-  writeFileSync(path.join(release, "SHA256SUMS"), `${checksum}  ${filename}\n`);
+  stageRelease("codegen", "codegen-release");
+  stageRelease("devtools", "devtools-release");
   process.stdout.write(
     "Packed consumer passed: imports, generated types, SSR, browser build, CLI drift detection, and watcher shutdown.\n",
   );
