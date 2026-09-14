@@ -10,6 +10,10 @@ const packages = {
     directory: "packages/codegen",
     homepage: "https://priemskiyyy.github.io/react-centrifugo/codegen",
   },
+  "react-centrifugo-devtools": {
+    directory: "packages/devtools",
+    homepage: "https://priemskiyyy.github.io/react-centrifugo/devtools",
+  },
 };
 const selected = process.argv.slice(2);
 const names = selected.length === 0 ? Object.keys(packages) : selected;
@@ -41,14 +45,16 @@ for (const name of names) {
   );
   assert.equal(metadata.publishConfig.access, "public");
   assert.match(metadata.version, /^\d+\.\d+\.\d+(?:-[\w.-]+)?$/);
-  assert(
-    changelog
-      .split("\n")
-      .some((line) => line.startsWith(`## ${name} ${metadata.version} — `)),
-    `${name} ${metadata.version} needs a changelog entry.`,
-  );
+  const entry = changelog
+    .split("\n")
+    .find((line) => line.startsWith(`## ${name} ${metadata.version} — `));
+  assert(entry, `${name} ${metadata.version} needs a changelog entry.`);
   const tag = process.env.RELEASE_TAG;
   if (tag !== undefined) {
+    assert(
+      !entry.endsWith("Unreleased"),
+      "Date the changelog entry before publishing a release.",
+    );
     assert.equal(
       tag,
       `${name}-v${metadata.version}`,

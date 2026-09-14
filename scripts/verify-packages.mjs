@@ -5,6 +5,7 @@ import {
   copyFileSync,
   mkdirSync,
   mkdtempSync,
+  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -93,7 +94,12 @@ const verifyWatchShutdown = (cli) =>
 try {
   mkdirSync(artifacts, { recursive: true });
   rmSync(release, { recursive: true, force: true });
-  const tarballs = ["react-centrifugo", "codegen"].map((directory) => {
+  const names = {
+    "react-centrifugo": "react-centrifugo",
+    codegen: "react-centrifugo-codegen",
+    devtools: "react-centrifugo-devtools",
+  };
+  const tarballs = Object.keys(names).map((directory) => {
     const packageDirectory = path.join(workspace, "packages", directory);
     process.stdout.write(
       run("pnpm", ["exec", "publint", packageDirectory], workspace),
@@ -108,10 +114,7 @@ try {
     assert(packed.files.some((file) => file.path === "README.md"));
     assert(packed.files.some((file) => file.path === "LICENSE"));
     assert(!packed.files.some((file) => file.path.startsWith("src/")));
-    assert.equal(
-      packed.name,
-      directory === "codegen" ? "react-centrifugo-codegen" : directory,
-    );
+    assert.equal(packed.name, names[directory]);
     return path.join(artifacts, packed.filename);
   });
 
@@ -160,6 +163,7 @@ try {
       moduleResolution: "Bundler",
       jsx: "react-jsx",
       lib: ["ES2022", "DOM"],
+      types: ["vite/client"],
     },
     include: ["*.ts", "*.tsx", "generated/*.ts"],
   });
@@ -196,9 +200,10 @@ export const useContracts = () => {
     "main.tsx",
     `import { createRoot } from "react-dom/client";
 import { CentrifugeProvider } from "react-centrifugo";
+import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
 import { useMessageCreated } from "./generated/index.js";
 const Messages = () => { useMessageCreated("rooms:one", () => {}); return <p>Connected</p>; };
-createRoot(document.body).render(<CentrifugeProvider configuration={{ session: { id: "consumer", enabled: false }, transport: "ws://localhost" }}><Messages /></CentrifugeProvider>);\n`,
+createRoot(document.body).render(<CentrifugeProvider configuration={{ session: { id: "consumer", enabled: false }, transport: "ws://localhost" }}><Messages />{import.meta.env.DEV ? <ReactCentrifugoDevtools /> : null}</CentrifugeProvider>);\n`,
   );
   write(
     "index.html",
@@ -210,9 +215,14 @@ createRoot(document.body).render(<CentrifugeProvider configuration={{ session: {
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { CentrifugeProvider, useChannel, useConnectionState } from "react-centrifugo";
+import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
+import { useRealtimeDiagnostics } from "react-centrifugo/devtools";
 const Child = () => { useChannel("rooms:one", () => {}); return createElement("span", null, useConnectionState()); };
 const html = renderToString(createElement(CentrifugeProvider, { configuration: { session: { id: "server" }, transport: "ws://localhost" } }, createElement(Child)));
-assert.equal(html, "<span>disconnected</span>");\n`,
+assert.equal(html, "<span>disconnected</span>");
+const Inspector = () => { assert.equal(useRealtimeDiagnostics().get().session, null); return createElement(ReactCentrifugoDevtools, { initialIsOpen: true }); };
+const inspected = renderToString(createElement(CentrifugeProvider, { configuration: { session: { id: "server" }, transport: "ws://localhost" } }, createElement(Inspector)));
+assert.match(inspected, /Waiting for events/);\n`,
   );
 
   const codegen = path.join(consumer, "node_modules/react-centrifugo-codegen");
@@ -243,6 +253,15 @@ assert.equal(html, "<span>disconnected</span>");\n`,
   run(process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]);
   run(process.execPath, ["ssr.mjs"]);
   run(process.execPath, ["node_modules/vite/bin/vite.js", "build"]);
+  const assets = path.join(consumer, "dist/assets");
+  const production = readdirSync(assets)
+    .filter((name) => name.endsWith(".js") || name.endsWith(".css"))
+    .map((name) => readFileSync(path.join(assets, name), "utf8"))
+    .join("\n");
+  assert.doesNotMatch(
+    production,
+    /rc-devtools|Capture payloads|Circular or repeated reference/,
+  );
   await verifyWatchShutdown(cli);
   const filename = `${metadata.name}-${metadata.version}.tgz`;
   const tarball = path.join(artifacts, filename);
