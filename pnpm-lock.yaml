@@ -99,6 +99,9 @@ importers:
       react-centrifugo-codegen:
         specifier: workspace:*
         version: link:../../packages/codegen
+      react-centrifugo-devtools:
+        specifier: workspace:*
+        version: link:../../packages/devtools
 
   packages/codegen:
     dependencies:
@@ -114,6 +117,19 @@ importers:
       typescript:
         specifier: '>=5.8 <6'
         version: 5.8.3
+
+  packages/devtools:
+    dependencies:
+      react:
+        specifier: '>=19.2.0 <20'
+        version: 19.2.8
+      zod:
+        specifier: ^4.6.2
+        version: 4.6.2
+    devDependencies:
+      react-centrifugo:
+        specifier: workspace:*
+        version: link:../react-centrifugo
 
   packages/react-centrifugo:
     dependencies:

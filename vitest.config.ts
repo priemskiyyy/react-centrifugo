@@ -6,7 +6,7 @@ export default defineConfig({
     globals: false,
     environment: "node",
     restoreMocks: true,
-    projects: ["react-centrifugo", "codegen"].map((name) => ({
+    projects: ["react-centrifugo", "codegen", "devtools"].map((name) => ({
       extends: true,
       resolve: {
         alias: {
