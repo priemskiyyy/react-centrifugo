@@ -1,5 +1,7 @@
-import { StrictMode, useEffect, useState } from "react";
+import { StrictMode, useActionState, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
+import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
+import "./styles.css";
 import type { Centrifuge, Subscription, SubscriptionEvents } from "centrifuge";
 import {
   CentrifugeProvider,
@@ -15,9 +17,82 @@ const parameters = new URLSearchParams(location.search);
 const initialUser = parameters.get("user") ?? "browser-test";
 const refresh = parameters.has("refresh");
 const invalid = parameters.has("invalid");
+const isPlayground = parameters.has("devtools");
+const scenarios = [
+  { label: "Happy path", flags: [] },
+  { label: "Token refresh", flags: ["refresh"] },
+  { label: "Invalid token", flags: ["invalid"] },
+];
+const activeFlags = ["refresh", "invalid"].filter((flag) =>
+  parameters.has(flag),
+);
+const isCurrentScenario = (flags: string[]) =>
+  flags.length === activeFlags.length &&
+  flags.every((flag) => activeFlags.includes(flag));
+const scenarioHref = (user: string, flags: string[]) => {
+  const next = new URLSearchParams({ devtools: "", user });
+  for (const flag of flags) {
+    next.set(flag, "");
+  }
+  return `?${next.toString().replaceAll("=&", "&").replace(/=$/, "")}`;
+};
 const sockets = new Set<WebSocket>();
 const clients = new Set<Centrifuge>();
 const subscriptions = new Set<Subscription>();
+
+const Publisher = ({ user }: { user: string }) => {
+  const [result, publish, pending] = useActionState(
+    async (_previous: string, form: FormData) => {
+      const text = form.get("message");
+      const channel = form.get("channel");
+
+      if (typeof text !== "string" || text.trim() === "") {
+        return "Enter a message first.";
+      }
+
+      return fetch("/test-api/publish", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ channel, data: { text } }),
+      })
+        .then((response) => {
+          if (!response.ok) {
+            return "The local server could not publish this message.";
+          }
+
+          return "Published. Both consumers receive the same message.";
+        })
+        .catch(() => "The local server is unavailable.");
+    },
+    "",
+  );
+
+  return (
+    <form action={publish}>
+      <label>
+        Test message{" "}
+        <input
+          name="message"
+          defaultValue="Hello from the realtime playground"
+          required
+        />
+      </label>
+      <label>
+        Channel{" "}
+        <select name="channel">
+          <option value={`private:${user}`}>private:{user}</option>
+          <option value={`private:${user}-alerts`}>
+            private:{user}-alerts
+          </option>
+        </select>
+      </label>
+      <button type="submit" disabled={pending}>
+        {pending ? "Publishing…" : "Publish message"}
+      </button>
+      <p role="status">{result}</p>
+    </form>
+  );
+};
 
 class ObservedWebSocket extends WebSocket {
   constructor(url: string | URL, protocols?: string | string[]) {
@@ -54,6 +129,7 @@ const Session = ({ user }: { user: string }) => {
   const channel = `private:${user}`;
   const [first, setFirst] = useState(true);
   const [second, setSecond] = useState(true);
+  const [alerts, setAlerts] = useState(false);
   const [recoveries, setRecoveries] = useState<
     Array<{ wasRecovering: boolean; recovered: boolean }>
   >([]);
@@ -100,8 +176,19 @@ const Session = ({ user }: { user: string }) => {
         />
         Second consumer
       </label>
-      {first && <Consumer channel={channel} name="first" />}
-      {second && <Consumer channel={channel} name="second" />}
+      {isPlayground ? (
+        <label>
+          <input
+            type="checkbox"
+            checked={alerts}
+            onChange={(event) => setAlerts(event.target.checked)}
+          />
+          Alerts channel
+        </label>
+      ) : null}
+      {first ? <Consumer channel={channel} name="first" /> : null}
+      {second ? <Consumer channel={channel} name="second" /> : null}
+      {alerts ? <Consumer channel={`${channel}-alerts`} name="alerts" /> : null}
     </section>
   );
 };
@@ -161,8 +248,30 @@ const Application = () => {
     );
   };
   return (
-    <main>
-      <h1>React Centrifugo browser tests</h1>
+    <main className={parameters.has("devtools") ? "playground" : undefined}>
+      <header>
+        <h1>
+          {isPlayground
+            ? "React Centrifugo playground"
+            : "React Centrifugo browser tests"}
+        </h1>
+        {isPlayground ? (
+          <nav aria-label="Scenarios">
+            {scenarios.map((scenario) => (
+              <a
+                key={scenario.label}
+                href={scenarioHref(user, scenario.flags)}
+                aria-current={
+                  isCurrentScenario(scenario.flags) ? "page" : undefined
+                }
+              >
+                {scenario.label}
+              </a>
+            ))}
+          </nav>
+        ) : null}
+      </header>
+      {isPlayground ? <Publisher user={user} /> : null}
       <label>
         User
         <input
@@ -206,6 +315,9 @@ const Application = () => {
           }}
         >
           <Session user={user} />
+          {parameters.has("devtools") ? (
+            <ReactCentrifugoDevtools initialIsOpen maxEvents={100} />
+          ) : null}
         </CentrifugeProvider>
       )}
     </main>

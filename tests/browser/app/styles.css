@@ -1,0 +1,112 @@
+/* Keep every selector under `.playground >`. The devtools panel renders inside this page and must not pick up its styles. */
+body:has(.playground) {
+  margin: 0;
+  background: #f4f7fa;
+  color: #263445;
+  font:
+    13px/1.5 system-ui,
+    sans-serif;
+}
+.playground {
+  padding: 24px;
+}
+.playground > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.playground h1 {
+  margin: 0;
+  color: #142838;
+  font-size: 24px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+}
+.playground > header nav {
+  display: flex;
+  gap: 6px;
+}
+.playground > header nav a {
+  padding: 5px 10px;
+  border: 1px solid #c9d3dd;
+  border-radius: 999px;
+  color: #24394b;
+  text-decoration: none;
+}
+.playground > header nav a[aria-current="page"] {
+  background: #142838;
+  border-color: #142838;
+  color: white;
+}
+.playground > form select {
+  font: inherit;
+  padding: 6px 9px;
+  border: 1px solid #c9d3dd;
+  border-radius: 5px;
+  background: white;
+}
+.playground > form {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+}
+.playground > form p {
+  margin: 0;
+  color: #32664d;
+  font-size: 12px;
+}
+.playground > label,
+.playground > form label,
+.playground > section > label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 12px;
+}
+.playground > label input,
+.playground > form input {
+  font: inherit;
+  padding: 6px 9px;
+  border: 1px solid #c9d3dd;
+  border-radius: 5px;
+}
+.playground > form input {
+  width: 240px;
+  max-width: 50vw;
+}
+.playground > button,
+.playground > form button {
+  padding: 7px 12px;
+  border: 1px solid #bbcbd8;
+  border-radius: 5px;
+  background: white;
+  color: #24394b;
+  font: inherit;
+  cursor: pointer;
+}
+.playground > section {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 18px;
+}
+.playground > section output {
+  color: #42715f;
+  font:
+    11px/1.5 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.playground > output {
+  font:
+    11px/1.5 ui-monospace,
+    monospace;
+  overflow-wrap: anywhere;
+}

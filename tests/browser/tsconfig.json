@@ -3,7 +3,8 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "react-centrifugo": ["../../packages/react-centrifugo/dist/index.d.ts"]
+      "react-centrifugo": ["../../packages/react-centrifugo/dist/index.d.ts"],
+      "react-centrifugo-devtools": ["../../packages/devtools/dist/index.d.ts"]
     }
   },
   "include": ["**/*.ts", "**/*.tsx"]

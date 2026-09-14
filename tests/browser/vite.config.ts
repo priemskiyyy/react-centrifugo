@@ -5,6 +5,15 @@ export default defineConfig({
   root: fileURLToPath(new URL("./app", import.meta.url)),
   resolve: {
     alias: {
+      "react-centrifugo/devtools": fileURLToPath(
+        new URL(
+          "../../packages/react-centrifugo/dist/devtools.js",
+          import.meta.url,
+        ),
+      ),
+      "react-centrifugo-devtools": fileURLToPath(
+        new URL("../../packages/devtools/dist/index.js", import.meta.url),
+      ),
       "react-centrifugo": fileURLToPath(
         new URL(
           "../../packages/react-centrifugo/dist/index.js",

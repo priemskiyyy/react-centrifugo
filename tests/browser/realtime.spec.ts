@@ -31,6 +31,70 @@ test.beforeEach(async ({ page }) => {
   });
 });
 
+test("devtools records live publications without retaining subscriptions", async ({
+  page,
+  request,
+}) => {
+  const user = await open(page, "&devtools");
+  await subscribed(page);
+  const panel = page.getByRole("complementary", {
+    name: "React Centrifugo devtools",
+  });
+  await expect(panel).toBeVisible();
+  await expect(panel).toContainText(`private:${user}`);
+  await expect(panel).toContainText("3 event listeners");
+  await page.getByLabel("Test message").fill("capture-off");
+  await page.getByRole("button", { name: "Publish message" }).click();
+  await expect(
+    page.getByText("Published. Both consumers receive the same message."),
+  ).toBeVisible();
+  await expect(page.getByTestId("first")).toHaveText('["capture-off"]');
+  await expect(
+    panel.locator("summary").filter({ hasText: "publication" }),
+  ).toHaveCount(1);
+  await expect(panel).not.toContainText("capture-off");
+  await panel.getByLabel("Capture payloads").check();
+  await post(request, "publish", {
+    channel: `private:${user}`,
+    data: { text: "capture-on", token: "never-display" },
+  });
+  await expect(panel).toContainText("capture-on");
+  await expect(panel).not.toContainText("never-display");
+  await panel.getByRole("button", { name: "Pause", exact: true }).click();
+  await panel.getByRole("button", { name: "Clear", exact: true }).click();
+  await post(request, "publish", {
+    channel: `private:${user}`,
+    data: { text: "while-paused" },
+  });
+  await expect(page.getByTestId("first")).toContainText("while-paused");
+  await expect(panel).toContainText("Recording paused");
+  await panel.getByRole("button", { name: "Resume" }).click();
+  await page.getByLabel("First consumer").uncheck();
+  await page.getByLabel("Second consumer").uncheck();
+  await expect(page.getByTestId("channel")).toHaveText("detached");
+  expect(await inspect(page)).toMatchObject({
+    subscriptions: 0,
+    publicationListeners: 0,
+  });
+  await expect(panel).toContainText("0 event listeners");
+  await expect
+    .poll(async () =>
+      Object.keys(
+        (await post(request, "presence", { channel: `private:${user}` }))
+          .presence,
+      ),
+    )
+    .toEqual([]);
+  await panel.getByLabel("Filter events").fill("no-match");
+  await expect(panel).toContainText("No matching events");
+  await panel.getByRole("button", { name: "Clear filters" }).click();
+  await panel.getByLabel("Filter events").press("Escape");
+  await expect(panel).not.toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Open React Centrifugo devtools" }),
+  ).toBeFocused();
+});
+
 test("shares an authenticated subscription and releases it after the last consumer", async ({
   page,
   request,
