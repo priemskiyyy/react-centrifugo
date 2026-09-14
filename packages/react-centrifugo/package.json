@@ -1,6 +1,6 @@
 {
   "name": "react-centrifugo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Typed React hooks for Centrifugo, with shared subscriptions and generated event hooks.",
   "type": "module",
   "license": "MIT",
