@@ -2,7 +2,7 @@
 
 React hooks for [Centrifugo](https://centrifugal.dev/). Components listening to the same channel share a subscription. The provider handles connection ownership and cleanup; hooks expose publications, typed events, and connection state.
 
-Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`.
+Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`. Two optional packages come with it: `react-centrifugo-codegen` generates named hooks from your event map, and `react-centrifugo-devtools` adds a browser panel for connections, channels, and events.
 
 ## Usage
 

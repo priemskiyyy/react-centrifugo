@@ -43,6 +43,7 @@ export default withMermaid(
         { text: "Guide", link: "/getting-started" },
         { text: "Code generation", link: "/codegen" },
         { text: "Hooks", link: "/hooks" },
+        { text: "Devtools", link: "/devtools" },
       ],
       sidebar: [
         {
