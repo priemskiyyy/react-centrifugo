@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CentrifugeProvider } from "react-centrifugo";
+import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
 import { Room } from "src/Room";
 import "src/styles.css";
 
@@ -39,6 +40,7 @@ export const Application = () => {
         }}
       >
         <Room key={roomId} id={roomId} />
+        {import.meta.env.DEV ? <ReactCentrifugoDevtools initialIsOpen /> : null}
       </CentrifugeProvider>
       <p>
         Connect to a Centrifugo server configured to allow this channel, then

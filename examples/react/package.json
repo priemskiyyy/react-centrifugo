@@ -16,6 +16,7 @@
     "react-centrifugo": "workspace:*"
   },
   "devDependencies": {
-    "react-centrifugo-codegen": "workspace:*"
+    "react-centrifugo-codegen": "workspace:*",
+    "react-centrifugo-devtools": "workspace:*"
   }
 }
