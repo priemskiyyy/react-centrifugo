@@ -4,20 +4,37 @@ import { withMermaid } from "vitepress-plugin-mermaid";
 // Project pages are served from /<repository>/. Set this to "/" for a user page
 // or a custom domain.
 const base = "/react-centrifugo/";
+const site = "https://priemskiyyy.github.io/react-centrifugo/";
+const description =
+  "React hooks for Centrifugo realtime messaging: shared WebSocket subscriptions, typed events, generated hooks, and browser devtools.";
 
 export default withMermaid(
   defineConfig({
     base,
     lang: "en-US",
     title: "React Centrifugo",
-    description:
-      "React hooks for Centrifugo with shared subscriptions, optional parsing, and typed generated event hooks.",
+    description,
     head: [
       [
         "link",
         { rel: "icon", type: "image/svg+xml", href: `${base}favicon.svg` },
       ],
+      [
+        "meta",
+        {
+          name: "keywords",
+          content:
+            "react, react hooks, centrifugo, centrifuge, websocket, realtime, pubsub, typescript, devtools, codegen",
+        },
+      ],
+      ["meta", { property: "og:type", content: "website" }],
+      ["meta", { property: "og:site_name", content: "React Centrifugo" }],
+      ["meta", { property: "og:title", content: "React Centrifugo" }],
+      ["meta", { property: "og:description", content: description }],
+      ["meta", { property: "og:url", content: site }],
+      ["meta", { name: "twitter:card", content: "summary" }],
     ],
+    sitemap: { hostname: site },
     // README.md is the GitHub-facing index; index.md is the site home.
     srcExclude: ["README.md"],
     cleanUrls: true,

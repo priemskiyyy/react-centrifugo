@@ -1,7 +1,7 @@
 {
   "name": "react-centrifugo-devtools",
   "version": "0.2.0",
-  "description": "Inspect React Centrifugo connections, subscriptions, and events.",
+  "description": "Browser devtools for react-centrifugo: inspect Centrifugo connections, channel subscriptions, and realtime events.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -45,9 +45,15 @@
   },
   "keywords": [
     "react",
+    "react-hooks",
     "centrifugo",
+    "centrifuge",
     "devtools",
-    "websocket"
+    "inspector",
+    "debugging",
+    "websocket",
+    "realtime",
+    "typescript"
   ],
   "dependencies": {
     "zod": "^4.6.2"

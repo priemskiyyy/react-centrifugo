@@ -1,7 +1,7 @@
 {
   "name": "react-centrifugo-codegen",
   "version": "0.2.0",
-  "description": "Generate typed event hooks for react-centrifugo from your TypeScript event map.",
+  "description": "Generate typed React hooks for react-centrifugo from your TypeScript event map.",
   "type": "module",
   "license": "MIT",
   "sideEffects": false,
@@ -38,9 +38,16 @@
   },
   "keywords": [
     "react",
+    "react-hooks",
     "centrifugo",
+    "centrifuge",
     "codegen",
-    "typescript"
+    "code-generation",
+    "cli",
+    "typescript",
+    "typed-events",
+    "websocket",
+    "realtime"
   ],
   "dependencies": {
     "@effect/cli": "0.77.1",

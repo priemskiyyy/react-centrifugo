@@ -1,7 +1,7 @@
 {
   "name": "react-centrifugo",
   "version": "0.2.0",
-  "description": "Typed React hooks for Centrifugo, with shared subscriptions and generated event hooks.",
+  "description": "React hooks for Centrifugo realtime messaging: shared WebSocket subscriptions, typed publications and events, connection state, and SSR-safe cleanup.",
   "type": "module",
   "license": "MIT",
   "repository": {
@@ -46,11 +46,18 @@
   },
   "keywords": [
     "react",
+    "react-hooks",
     "react-native",
     "centrifugo",
     "centrifuge",
-    "hooks",
+    "centrifugal",
     "websocket",
-    "typescript"
+    "realtime",
+    "real-time",
+    "pubsub",
+    "subscriptions",
+    "typed-events",
+    "typescript",
+    "ssr"
   ]
 }
