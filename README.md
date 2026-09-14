@@ -64,10 +64,11 @@ The optional `react-centrifugo-codegen` package generates named hooks such as `u
 
 ## Packages
 
-| Package                    | Directory                                            |
-| -------------------------- | ---------------------------------------------------- |
-| `react-centrifugo`         | [Runtime and React hooks](packages/react-centrifugo) |
-| `react-centrifugo-codegen` | [Optional code generation CLI](packages/codegen)     |
+| Package                     | Directory                                                            |
+| --------------------------- | -------------------------------------------------------------------- |
+| `react-centrifugo`          | [Runtime and React hooks](packages/react-centrifugo)                 |
+| `react-centrifugo-codegen`  | [Optional code generation CLI](packages/codegen)                     |
+| `react-centrifugo-devtools` | [Experimental browser inspector (workspace only)](packages/devtools) |
 
 The runtime is ESM and has no React DOM or Effect dependency. React Native device support remains unverified. See [server rendering and platform support](docs/server-rendering.md).
 
@@ -80,7 +81,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-`pnpm check` builds both packages and checks types, lint, formatting, unit tests, generated files, the example app, and an isolated package consumer.
+`pnpm check` builds all packages and checks types, lint, formatting, unit tests, generated files, the example app, and an isolated package consumer.
 
 For browser tests, start Docker and install the test browsers:
 
@@ -95,7 +96,7 @@ These tests run the built runtime against a pinned Centrifugo server. They cover
 | ------------------------- | ------------------------------------------------------------------ |
 | `pnpm dev:docs`           | Run the documentation site.                                        |
 | `pnpm build:docs`         | Build documentation and check internal links.                      |
-| `pnpm test:unit`          | Run runtime and codegen unit tests.                                |
+| `pnpm test:unit`          | Run runtime, codegen, and devtools unit tests.                     |
 | `pnpm test:compatibility` | Check the runtime tarball with minimum and current React versions. |
 | `pnpm check:release`      | Run the complete local release checks.                             |
 

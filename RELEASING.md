@@ -2,6 +2,8 @@
 
 The runtime and codegen packages are versioned independently. Each has its own GitHub release tag and publishing workflow. Pushes and verification runs do not publish npm packages.
 
+The devtools package and runtime 0.2.0 are currently unreleased. Devtools is covered by package and browser checks, but has no publishing workflow or npm trusted publisher yet. Prepare its initial publication separately when the API is ready.
+
 | Package                    | Version file                             | GitHub release tag                    | Workflow              | Verified artifact directory  |
 | -------------------------- | ---------------------------------------- | ------------------------------------- | --------------------- | ---------------------------- |
 | `react-centrifugo`         | `packages/react-centrifugo/package.json` | `react-centrifugo-v<version>`         | `runtime.publish.yml` | `.artifacts/release`         |
