@@ -11,6 +11,8 @@ import { EventListeners } from "src/utils/internal/EventListeners";
 import { ResourceScope } from "src/utils/internal/ResourceScope";
 import { ValueStore } from "src/utils/internal/ValueStore";
 import { createScopedCallback } from "src/utils/internal/createScopedCallback";
+import type { Diagnostics } from "src/utils/internal/Diagnostics";
+import type { RealtimeSnapshot } from "src/types/RealtimeDiagnostics";
 
 type ChannelSession = {
   id: symbol;
@@ -55,10 +57,30 @@ const createChannelStatus = (events: EventListeners<SubscriptionEvents>) => {
 export class RealtimeChannels {
   #channels = new Map<string, Channel>();
   #session: SessionSource;
+  #diagnostics: Diagnostics;
 
-  constructor(session: SessionSource) {
+  constructor(session: SessionSource, diagnostics: Diagnostics) {
     this.#session = session;
+    this.#diagnostics = diagnostics;
   }
+
+  inspect = (): RealtimeSnapshot["channels"] =>
+    [...this.#channels.values()].map((channel) => {
+      const { state, error } = channel.status.get();
+
+      return {
+        name: channel.name,
+        state,
+        error:
+          error === null
+            ? null
+            : { code: error.error.code, message: error.error.message },
+        consumers: {
+          events: channel.consumers.events.size,
+          status: channel.consumers.status.size,
+        },
+      };
+    });
 
   get = (name: string): RealtimeChannelView => ({
     events: {
@@ -105,9 +127,11 @@ export class RealtimeChannels {
     const consumerId = Symbol("channel consumer");
     const consumers = channel.consumers[consumerType];
     consumers.add(consumerId);
+    this.#diagnostics.changed();
 
     consumer.addCleanup(() => {
       consumers.delete(consumerId);
+      this.#diagnostics.changed();
 
       // Native demand comes from event consumers only; status observers just watch.
       if (channel.consumers.events.size > 0) {
@@ -116,6 +140,7 @@ export class RealtimeChannels {
 
       if (channel.consumers.status.size === 0) {
         this.#channels.delete(name);
+        this.#diagnostics.record("runtime", "channel.removed", {}, name);
       }
 
       if (channel.attachment === null) {
@@ -148,6 +173,9 @@ export class RealtimeChannels {
       attachment: null,
     };
     this.#channels.set(name, channel);
+    channel.status.subscribe(this.#diagnostics.changed);
+    this.#diagnostics.changed();
+    this.#diagnostics.record("runtime", "channel.added", {}, name);
     return channel;
   };
 
@@ -211,6 +239,12 @@ export class RealtimeChannels {
 
       channel.attachment = null;
       channel.status.set(DETACHED_CHANNEL_STATUS);
+      this.#diagnostics.record(
+        "runtime",
+        "subscription.detached",
+        {},
+        channel.name,
+      );
     });
     session.scope.adopt(scope);
 
@@ -231,6 +265,20 @@ export class RealtimeChannels {
         subscription.removeAllListeners();
         client.removeSubscription(subscription);
       });
+      this.#diagnostics.observe<SubscriptionEvents>(
+        subscription,
+        [
+          "subscribing",
+          "subscribed",
+          "unsubscribed",
+          "error",
+          "publication",
+          "join",
+          "leave",
+        ],
+        scope,
+        channel.name,
+      );
       channel.events.bind(subscription, scope);
 
       if (!scope.isActive()) {

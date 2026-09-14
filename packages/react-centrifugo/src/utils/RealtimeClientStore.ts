@@ -8,10 +8,12 @@ import { ResourceScope } from "src/utils/internal/ResourceScope";
 import { ValueStore } from "src/utils/internal/ValueStore";
 import { notifyOnChange } from "src/utils/internal/notifyOnChange";
 import { getConnectionOptions } from "src/utils/internal/getConnectionOptions";
+import { Diagnostics } from "src/utils/internal/Diagnostics";
 
 type SessionState =
   | {
       id: symbol;
+      name: string;
       client: Centrifuge;
       configuration: ConfigurationSource;
       scope: ResourceScope;
@@ -23,12 +25,22 @@ type SessionState =
 
 export class RealtimeClientStore {
   #events = new EventListeners<ClientEvents>();
+  #diagnostics: Diagnostics = new Diagnostics(() => {
+    const session = this.session.get();
+
+    return {
+      session: session === null ? null : { id: session.name },
+      connection: this.api.connection.get(),
+      channels: this.#channels.inspect(),
+    };
+  });
 
   session = this.#createSession();
 
-  #channels = new RealtimeChannels(this.session);
+  #channels = new RealtimeChannels(this.session, this.#diagnostics);
 
   api: RealtimeStoreApi = {
+    diagnostics: this.#diagnostics.api,
     client: {
       get: () => {
         const session = this.session.get();
@@ -68,6 +80,8 @@ export class RealtimeClientStore {
 
   #createSession() {
     const state = new ValueStore<SessionState | null>(null);
+    state.subscribe(this.#diagnostics.changed);
+    this.#events.subscribe("state", this.#diagnostics.changed);
 
     const session = {
       get: () => {
@@ -122,6 +136,7 @@ export class RealtimeClientStore {
           }
 
           const initial = configuration.get();
+          const name = initial.session.id;
 
           if (!scope.isActive()) {
             return scope.dispose;
@@ -146,6 +161,23 @@ export class RealtimeClientStore {
           const client = new Centrifuge(transport, options);
           scope.addCleanup(() => client.disconnect());
 
+          this.#diagnostics.observe<ClientEvents>(
+            client,
+            [
+              "connecting",
+              "connected",
+              "disconnected",
+              "error",
+              "publication",
+              "subscribed",
+              "subscribing",
+              "unsubscribed",
+              "join",
+              "leave",
+            ],
+            scope,
+          );
+
           this.#events.bind(client, scope);
 
           if (!scope.isActive()) {
@@ -154,10 +186,15 @@ export class RealtimeClientStore {
 
           state.set({
             id: Symbol("realtime session"),
+            name,
             client,
             configuration,
             scope,
           });
+          this.#diagnostics.record("runtime", "session.started", { id: name });
+          scope.addCleanup(() =>
+            this.#diagnostics.record("runtime", "session.ended", { id: name }),
+          );
 
           if (!scope.isActive()) {
             return scope.dispose;

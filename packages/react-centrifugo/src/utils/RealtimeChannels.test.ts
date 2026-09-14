@@ -3,6 +3,14 @@ import { expect, test, vi } from "vitest";
 import { RealtimeChannels } from "src/utils/RealtimeChannels";
 import { ResourceScope } from "src/utils/internal/ResourceScope";
 import { DETACHED_CHANNEL_STATUS } from "src/utils/constants/realtimeChannel";
+import { Diagnostics } from "src/utils/internal/Diagnostics";
+
+const createDiagnostics = () =>
+  new Diagnostics(() => ({
+    session: null,
+    connection: "disconnected",
+    channels: [],
+  }));
 
 const createSession = () => {
   const client = new Centrifuge("ws://localhost:8000");
@@ -29,7 +37,10 @@ const createSession = () => {
 
 test("passive status observers share a stable detached snapshot without opening subscriptions", () => {
   const session = createSession();
-  const channels = new RealtimeChannels({ get: () => session.view });
+  const channels = new RealtimeChannels(
+    { get: () => session.view },
+    createDiagnostics(),
+  );
   const first = channels.get("rooms:one");
   const second = channels.get("rooms:two");
   const listener = vi.fn();
@@ -55,7 +66,10 @@ test("narrow session views share and replace subscriptions by ID even when each 
   const first = createSession();
   const second = createSession();
   let session = first.view;
-  const channels = new RealtimeChannels({ get: () => ({ ...session }) });
+  const channels = new RealtimeChannels(
+    { get: () => ({ ...session }) },
+    createDiagnostics(),
+  );
   const consumers = new ResourceScope();
   const channel = channels.get("rooms:one");
   const onPublication = vi.fn();
