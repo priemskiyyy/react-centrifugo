@@ -62,7 +62,7 @@ jobs:
           REACT_VERSION: ${{ matrix.react }}
         run: |
           pnpm add -Dw --ignore-scripts "react@$REACT_VERSION" "react-dom@$REACT_VERSION"
-          pnpm --filter react-centrifugo-devtools add -D --ignore-scripts "react@$REACT_VERSION"
+          pnpm --filter react-centrifugo --filter react-centrifugo-devtools add -D --ignore-scripts "react@$REACT_VERSION"
 
       - name: Build runtime bridge
         working-directory: .
