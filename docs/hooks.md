@@ -21,6 +21,26 @@ Callbacks always see current render values without recreating the subscription,
 so you never need to memoise them. They may be async, but publications are not
 queued behind their completion.
 
+## Native types
+
+The runtime reports native values as `unknown` until an application says which
+client it builds. This package only ever builds a Centrifugo one, so register
+its type once, anywhere your typechecker sees:
+
+```ts
+import type { CentrifugeRealtimeClient } from "react-centrifugo";
+
+declare module "@priemskiyyy/simulcast-react" {
+  interface Register {
+    client: CentrifugeRealtimeClient;
+  }
+}
+```
+
+A publication's `native` then reads as Centrifugo's `PublicationContext`
+instead of `unknown`. Everything runs the same without it; only the types
+change. `useCentrifuge` is typed either way.
+
 ## useCentrifuge
 
 ```ts
@@ -131,8 +151,8 @@ type Publication = {
 ```
 
 Centrifugo's own `PublicationContext`, with its offset, tags, and client info,
-is under `native`. Centrifugo publications carry no provider event name, so
-`event` is absent.
+is under `native`, typed once the client type is registered. Centrifugo
+publications carry no provider event name, so `event` is absent.
 
 `parse` runs on every publication and its return type drives inference. The
 explicit generic declares your wire contract instead, and nothing validates it

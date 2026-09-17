@@ -40,15 +40,17 @@ import { useChannel } from "react-centrifugo";
 
 const Room = () => {
   useChannel("rooms:demo", (message, publication) => {
-    console.log(message, publication.offset);
+    console.log(message, publication.native.offset);
   });
 
   return null;
 };
 ```
 
-The first argument is the publication payload, the second is Centrifuge's own
-publication context: channel, offset, tags, and client info.
+The first argument is the publication payload, the second is the runtime
+publication. Centrifuge's own context, with its channel, offset, tags, and
+client info, sits under `native`. Register the client type once to have it typed;
+see [Hooks](hooks.md#native-types).
 
 Nothing subscribes until a component asks for events. Mounting the provider
 opens a connection; mounting `useChannel` opens the subscription. Two components
