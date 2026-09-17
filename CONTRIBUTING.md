@@ -1,11 +1,13 @@
 # Contributing
 
-Use Node 24 and the pnpm version in `package.json`. Run `pnpm install --frozen-lockfile`, then `pnpm check` before submitting a change.
+Use Node 22.18 or newer and the pnpm version in `package.json`. Run `pnpm install --frozen-lockfile`, then `pnpm check` before submitting a change.
 
 ## Layout
 
 - `packages/react-centrifugo`: React hooks over `@priemskiyyy/simulcast` and its Centrifugo adapter.
-- `examples/react`: a small application with generated hooks.
+- `examples/react`: the dashboard on the web, with generated hooks.
+- `examples/expo`: the same dashboard on React Native.
+- `examples/shared`: the domain both examples render.
 - `tests/browser`: a browser fixture backed by a real Centrifugo container.
 - `docs`: VitePress documentation.
 
@@ -17,7 +19,7 @@ Prefer descriptive names, early returns, and inferred types. Use `src/...` impor
 
 Add behavior tests for changes to subscription ownership, callbacks, or cleanup. Type-contract tests cover generic inference and invalid combinations. Keep hook JSDoc short and include an example.
 
-Generated hooks, their manifest, and the codegen configuration schema are committed. If they change, regenerate them and include the output in the same change.
+Generated hooks and their manifest are committed. If they change, regenerate them and include the output in the same change.
 
 ## Browser tests
 
