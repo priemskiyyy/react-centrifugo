@@ -2,6 +2,10 @@ export { CentrifugeProvider } from "src/context/CentrifugeProvider";
 export type { CentrifugeProviderProps } from "src/context/CentrifugeProvider";
 export type { CentrifugeConfiguration } from "src/types/CentrifugeConfiguration";
 
+// Registering this type with the React binding gives every re-exported hook
+// Centrifugo's native types; see the hook reference.
+export type { CentrifugeRealtimeClient } from "src/context/RealtimeClientContext";
+
 export { useCentrifuge } from "src/hooks/useCentrifuge";
 export { useClientEvent } from "src/hooks/useClientEvent";
 export { useSubscriptionEvent } from "src/hooks/useSubscriptionEvent";
