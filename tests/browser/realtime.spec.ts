@@ -38,11 +38,11 @@ test("devtools records live publications without retaining subscriptions", async
   const user = await open(page, "&devtools");
   await subscribed(page);
   const panel = page.getByRole("complementary", {
-    name: "React Centrifugo devtools",
+    name: "Simulcast devtools",
   });
   await expect(panel).toBeVisible();
   await expect(panel).toContainText(`private:${user}`);
-  await expect(panel).toContainText("3 event listeners");
+  await expect(panel).toContainText("3 publication listeners");
   await page.getByLabel("Test message").fill("capture-off");
   await page.getByRole("button", { name: "Publish message" }).click();
   await expect(
@@ -76,7 +76,7 @@ test("devtools records live publications without retaining subscriptions", async
     subscriptions: 0,
     publicationListeners: 0,
   });
-  await expect(panel).toContainText("0 event listeners");
+  await expect(panel).toContainText("0 publication listeners");
   await expect
     .poll(async () =>
       Object.keys(
@@ -91,7 +91,7 @@ test("devtools records live publications without retaining subscriptions", async
   await panel.getByLabel("Filter events").press("Escape");
   await expect(panel).not.toBeVisible();
   await expect(
-    page.getByRole("button", { name: "Open React Centrifugo devtools" }),
+    page.getByRole("button", { name: "Open Simulcast devtools" }),
   ).toBeFocused();
 });
 
