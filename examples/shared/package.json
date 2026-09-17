@@ -1,0 +1,17 @@
+{
+  "name": "example-shared",
+  "private": true,
+  "type": "module",
+  "description": "The Mission Control domain shared by both examples: event map, schemas, reducer, formatting, and tones.",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint:typescript": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "react-centrifugo": "workspace:*",
+    "ts-pattern": "5.9.0",
+    "zod": "4.6.5"
+  }
+}
