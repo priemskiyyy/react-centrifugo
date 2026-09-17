@@ -5,18 +5,24 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "generate:hooks": "react-centrifugo-codegen generate",
-    "validate:generated": "react-centrifugo-codegen check",
+    "generate:hooks": "simulcast-codegen generate",
+    "validate:generated": "simulcast-codegen check",
     "lint:typescript": "tsc --noEmit -p ."
   },
   "dependencies": {
-    "centrifuge": "5.7.2",
+    "@phosphor-icons/react": "2.1.10",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "example-shared": "workspace:*",
     "react": "19.2.8",
+    "react-centrifugo": "workspace:*",
     "react-dom": "19.2.8",
-    "react-centrifugo": "workspace:*"
+    "ts-pattern": "5.9.0"
   },
   "devDependencies": {
-    "react-centrifugo-codegen": "workspace:*",
-    "react-centrifugo-devtools": "workspace:*"
+    "@priemskiyyy/simulcast-codegen": "0.4.0",
+    "@priemskiyyy/simulcast-devtools": "0.4.0",
+    "@tailwindcss/vite": "4.3.3",
+    "tailwindcss": "4.3.3"
   }
 }

@@ -3,12 +3,12 @@ import type { ChannelInput, PublicationHandler, UseChannelOptions } from "react-
 import type { Events as RealtimeEvents } from "../../realtime/Events.js";
 import { useChannelEvent } from "../../realtime/useChannelEvent.js";
 
-type EventDefinition = RealtimeEvents["presence.changed"];
+type EventDefinition = RealtimeEvents["alert.resolved"];
 
-export const usePresenceChanged = (
+export const useAlertResolved = (
   channel: ChannelInput<EventDefinition["channel"]>,
   onEvent: PublicationHandler<EventDefinition["payload"]>,
   options: UseChannelOptions<EventDefinition["payload"]> = {},
 ) => {
-  return useChannelEvent(channel, "presence.changed", onEvent, options);
+  return useChannelEvent(channel, "alert.resolved", onEvent, options);
 };

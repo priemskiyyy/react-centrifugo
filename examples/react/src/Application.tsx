@@ -1,61 +1,47 @@
+import type React from "react";
 import { useState } from "react";
+import { SimulcastDevtools } from "@priemskiyyy/simulcast-devtools/react";
 import { CentrifugeProvider } from "react-centrifugo";
-import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
-import { Room } from "src/Room";
+import { Dashboard } from "src/components/Dashboard/Dashboard";
+import { Header } from "src/components/Header/Header";
+import { PublishHint } from "src/components/PublishHint/PublishHint";
+import { SharedSubscriptionPanel } from "src/components/SharedSubscriptionPanel/SharedSubscriptionPanel";
 import "src/styles.css";
 
-export const Application = () => {
-  const [enabled, setEnabled] = useState(false);
-  const [endpoint, setEndpoint] = useState(
-    "ws://localhost:8000/connection/websocket",
-  );
+const DEFAULT_ENDPOINT = "ws://localhost:8000/connection/websocket";
+
+export const Application: React.FunctionComponent = () => {
+  const [endpoint, setEndpoint] = useState(DEFAULT_ENDPOINT);
   const [roomId, setRoomId] = useState("demo");
+  const [enabled, setEnabled] = useState(false);
+  const [dashboardMounted, setDashboardMounted] = useState(true);
 
   return (
-    <main>
-      <h1>React Centrifugo</h1>
-      <p>Two generated event hooks share one subscription.</p>
-      <label>
-        WebSocket endpoint
-        <input
-          value={endpoint}
-          disabled={enabled}
-          onChange={(event) => setEndpoint(event.target.value)}
+    // The session ID carries the endpoint, so changing it starts a new session.
+    <CentrifugeProvider
+      configuration={{
+        session: { id: endpoint, enabled },
+        transport: endpoint,
+      }}
+    >
+      <Header
+        endpoint={endpoint}
+        roomId={roomId}
+        enabled={enabled}
+        onEndpointChange={setEndpoint}
+        onRoomChange={setRoomId}
+        onSessionToggle={() => setEnabled((current) => !current)}
+      />
+      <main className="mx-auto flex max-w-6xl flex-col gap-6 px-6 py-8">
+        <SharedSubscriptionPanel
+          roomId={roomId}
+          dashboardMounted={dashboardMounted}
+          onDashboardToggle={() => setDashboardMounted((current) => !current)}
         />
-      </label>
-      <label>
-        Room
-        <input
-          value={roomId}
-          onChange={(event) => setRoomId(event.target.value)}
-        />
-      </label>
-      <button type="button" onClick={() => setEnabled((current) => !current)}>
-        {enabled ? "Disconnect" : "Connect"}
-      </button>
-      <CentrifugeProvider
-        configuration={{
-          session: { id: endpoint, enabled },
-          transport: endpoint,
-        }}
-      >
-        <Room key={roomId} id={roomId} />
-        {import.meta.env.DEV ? <ReactCentrifugoDevtools initialIsOpen /> : null}
-      </CentrifugeProvider>
-      <p>
-        Connect to a Centrifugo server configured to allow this channel, then
-        publish:
-      </p>
-      <pre>
-        {JSON.stringify(
-          {
-            name: "message.created",
-            body: { id: "1", text: "Hello from Centrifugo" },
-          },
-          null,
-          2,
-        )}
-      </pre>
-    </main>
+        {dashboardMounted ? <Dashboard key={roomId} roomId={roomId} /> : null}
+        <PublishHint />
+      </main>
+      <SimulcastDevtools />
+    </CentrifugeProvider>
   );
 };

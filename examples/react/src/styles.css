@@ -1,33 +1,17 @@
-:root {
-  color-scheme: light dark;
-  font-family: system-ui, sans-serif;
-  line-height: 1.5;
+@import "tailwindcss";
+
+@theme {
+  --font-sans: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: ui-monospace, "SFMono-Regular", Menlo, monospace;
 }
+
 body {
-  margin: 0;
-}
-main {
-  max-width: 48rem;
-  margin: 3rem auto;
-  padding: 0 1.5rem;
-}
-label {
-  display: grid;
-  gap: 0.5rem;
-  margin: 1rem 0;
-}
-input,
-button {
-  font: inherit;
-  padding: 0.6rem;
-}
-section {
-  border-block: 1px solid #888;
-  margin-block: 2rem;
-  padding-block: 1rem;
-}
-pre {
-  overflow: auto;
-  padding: 1rem;
-  background: light-dark(#f3f3f3, #222);
+  @apply min-h-dvh bg-zinc-50 text-zinc-900 antialiased dark:bg-zinc-950 dark:text-zinc-100;
+  background-image:
+    radial-gradient(
+      60rem 30rem at 10% -10%,
+      rgb(16 185 129 / 0.12),
+      transparent
+    ),
+    radial-gradient(50rem 30rem at 100% 0%, rgb(56 189 248 / 0.12), transparent);
 }
