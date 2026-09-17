@@ -4,8 +4,7 @@ Use Node 24 and the pnpm version in `package.json`. Run `pnpm install --frozen-l
 
 ## Layout
 
-- `packages/react-centrifugo`: React hooks and runtime ownership.
-- `packages/codegen`: the optional Effect CLI.
+- `packages/react-centrifugo`: React hooks over `@priemskiyyy/simulcast` and its Centrifugo adapter.
 - `examples/react`: a small application with generated hooks.
 - `tests/browser`: a browser fixture backed by a real Centrifugo container.
 - `docs`: VitePress documentation.

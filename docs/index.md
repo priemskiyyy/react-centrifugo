@@ -1,74 +1,79 @@
 ---
-layout: home
-hero:
-  name: React Centrifugo
-  text: React hooks for Centrifugo
-  tagline: Shared channel subscriptions, typed events, generated hooks, and browser devtools.
-  actions:
-    - theme: brand
-      text: Get started
-      link: /getting-started
-    - theme: alt
-      text: Hook reference
-      link: /hooks
-    - theme: alt
-      text: GitHub
-      link: https://github.com/priemskiyyy/react-centrifugo
-features:
-  - title: Shared subscriptions
-    details: Components listening to the same channel share one native subscription. The last event listener releases it.
-    link: /hooks
-    linkText: Hooks
-  - title: Your payload types
-    details: Declare a payload type, infer it from a parser, or define an event map for channels carrying several event types.
-    link: /typed-events
-    linkText: Typed events
-  - title: Session ownership
-    details: Change the session ID to replace the client. Hooks follow the new session while the SDK handles reconnects and recovery.
-    link: /configuration
-    linkText: Configuration
-  - title: Generated hooks
-    details: The optional CLI turns your event map into named hooks such as useMessageCreated, with channel and payload types inferred from the map.
-    link: /codegen
-    linkText: Code generation
-  - title: Browser devtools
-    details: A floating panel shows the connection, every channel with listeners, and a timeline of events with errors highlighted and payloads on demand.
-    link: /devtools
-    linkText: Devtools
-  - title: Server rendering
-    details: Hooks render on the server with a stable disconnected state and open connections only after hydration.
-    link: /server-rendering
-    linkText: Server rendering
+title: React Centrifugo
+titleTemplate: Centrifugo hooks for React
+description: Centrifugo hooks for React. The native SDK surface on top of the simulcast runtime, with shared subscriptions, typed events, and generated hooks.
 ---
+
+# React Centrifugo
+
+**Centrifugo hooks for React.**
+
+This package builds a Centrifugo client from one configuration object and hands
+its native SDK surface to React. Subscription ownership, sharing, and cleanup
+come from [simulcast](https://priemskiyyy.github.io/simulcast/) and its
+Centrifugo adapter, so channel hooks are that runtime's own, re-exported here
+unchanged.
+
+[Get started](getting-started.md) · [Hooks](hooks.md) ·
+[Typed events](typed-events.md) · [Devtools](devtools.md) ·
+[GitHub](https://github.com/priemskiyyy/react-centrifugo)
+
+```sh
+pnpm add react-centrifugo centrifuge react
+```
 
 ## Receive a publication
 
 ```tsx
-import { useChannel } from "react-centrifugo";
+import { CentrifugeProvider, useChannel } from "react-centrifugo";
 
-type Message = { id: string; text: string };
+type Message = { text: string };
 
-function Room() {
+const Room = () => {
   useChannel<Message>("rooms:demo", (message) => {
     console.log(message.text);
   });
 
   return null;
-}
+};
+
+export const Application = () => (
+  <CentrifugeProvider
+    configuration={{
+      session: { id: "current-user" },
+      transport: "ws://localhost:8000/connection/websocket",
+    }}
+  >
+    <Room />
+  </CentrifugeProvider>
+);
 ```
 
-Mount `Room` inside a `CentrifugeProvider`. The generic declares the expected payload; pass `parse` for runtime validation.
+Components listening to the same channel share one native subscription. The last
+one to leave releases it.
 
-[Set up the provider](/getting-started)
+## What this package adds
 
-## Generate named event hooks
+Centrifugo exposes more than publications. These hooks reach that surface with
+the SDK's own types, while the runtime keeps owning the subscription:
 
-The optional CLI turns an event map into imports such as `useMessageCreated`. Channel and payload types come from your map, and `check` reports when generated files need updating.
+| Hook                                                    | Gives you                                   |
+| ------------------------------------------------------- | ------------------------------------------- |
+| [`useCentrifuge`](hooks.md#usecentrifuge)               | the native `Centrifuge` client              |
+| [`useSubscriptionEvent`](hooks.md#usesubscriptionevent) | `join`, `leave`, `subscribed`, and the rest |
+| [`useClientEvent`](hooks.md#useclientevent)             | connection level SDK events                 |
 
-[Set up code generation](/codegen)
+Use them for `publish`, `history`, `presence`, `rpc`, and recovery details that
+the runtime does not normalize.
 
-## Inspect the connection
+## What comes from the runtime
 
-The optional devtools package adds a floating panel: connection state, every channel with listeners, and a timeline of events with unexpected disconnects highlighted. It observes without creating subscriptions and stays out of production builds.
+`useChannel`, `useChannelDemand`, `useChannelStatus`, `useConnectionState`, and
+`createChannelEventHooks` are re-exported from `@priemskiyyy/simulcast-react`
+without changes. Importing them from either package gives the same functions, so
+an application can mix both imports freely. Their reference lives in
+[simulcast's documentation](https://priemskiyyy.github.io/simulcast/hooks).
 
-[Set up devtools](/devtools)
+Code generation and devtools are shared tools too:
+[`@priemskiyyy/simulcast-codegen`](codegen.md) and
+[`@priemskiyyy/simulcast-devtools`](devtools.md).

@@ -5,12 +5,12 @@
 Server rendering opens no socket. The provider creates its store, but the effect
 that starts a session never runs, so hooks render from inactive snapshots:
 
-| Hook                 | Server value                         |
-| -------------------- | ------------------------------------ |
-| `useConnectionState` | `"disconnected"`                     |
-| `useChannelStatus`   | `{ state: "detached", error: null }` |
-| `useCentrifuge`      | `null`                               |
-| `useChannel`         | nothing; the callback does not run   |
+| Hook                 | Server value                                           |
+| -------------------- | ------------------------------------------------------ |
+| `useConnectionState` | `"disconnected"`                                       |
+| `useChannelStatus`   | `{ state: "detached", error: null, recovered: false }` |
+| `useCentrifuge`      | `null`                                                 |
+| `useChannel`         | nothing; the callback does not run                     |
 
 Hydration begins from those same snapshots, so the first client render matches
 the server markup. The connection starts afterwards, in an effect.
@@ -31,5 +31,7 @@ to a socket.
 The same hooks work unchanged. Centrifuge JS uses the platform `WebSocket`,
 which React Native provides, so no transport configuration is needed.
 
-Device integration has not been verified yet. Treat React Native as expected to
-work rather than known to work, and report anything that does not.
+`examples/expo` runs the same dashboard as the web example and exports iOS and
+Android bundles. Hermes has no `Intl.PluralRules` or `Intl.RelativeTimeFormat`,
+so that example loads the `@formatjs` polyfills before rendering. Running on a
+physical device is not part of continuous integration.

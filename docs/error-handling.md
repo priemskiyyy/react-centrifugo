@@ -27,9 +27,21 @@ useChannel("rooms:demo", async (message) => {
 ```
 
 **Subscription errors.** A channel that fails to subscribe reports it through
-`useChannelStatus(channel).error`, which holds Centrifuge's own
-`SubscriptionErrorContext`. It stays set until the channel subscribes
-successfully.
+`useChannelStatus(channel).error`. The runtime passes the provider's error
+through untyped, as `{ error: unknown }`, so narrow it before reading fields:
+
+```tsx
+const { error } = useChannelStatus(channel);
+const reason =
+  typeof error?.error === "object" &&
+  error.error !== null &&
+  "error" in error.error
+    ? error.error.error
+    : null;
+```
+
+The React example shows the same narrowing. The error stays set until the
+channel subscribes successfully.
 
 ## Reconnects
 
@@ -44,7 +56,30 @@ transport binding, not a cache.
 ## Recovering missed publications
 
 Centrifugo can replay publications you missed while disconnected. Whether it
-managed to is reported on the `subscribed` event:
+managed to is reported on the channel status:
+
+```tsx
+const { recovered, state } = useChannelStatus("rooms:demo");
+
+useEffect(() => {
+  if (state !== "subscribed") {
+    return;
+  }
+
+  if (recovered) {
+    return;
+  }
+
+  refetchRoom();
+}, [state, recovered]);
+```
+
+`recovered` is `false` on a first subscription as well as after a failed
+recovery, so it reports the absence of a guarantee rather than proof of loss.
+Refetch when it is `false` and the channel is subscribed.
+
+The SDK's own context carries more detail, including whether a resubscribe was
+even attempting recovery:
 
 ```tsx
 useSubscriptionEvent(
@@ -70,8 +105,8 @@ fails, refetch from your API.** The missed publications are gone.
 
 ## Codegen failures
 
-`react-centrifugo-codegen` separates problems with your project from bugs in the
-tool:
+`@priemskiyyy/simulcast-codegen` separates problems with your project from bugs
+in the tool:
 
 - A **`CodegenFailure`** prints one line and exits 1. That covers an unreadable
   configuration, an event map that cannot be enumerated, and files that cannot

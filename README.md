@@ -1,8 +1,8 @@
 # React Centrifugo
 
-React hooks for [Centrifugo](https://centrifugal.dev/). Components listening to the same channel share a subscription. The provider handles connection ownership and cleanup; hooks expose publications, typed events, and connection state.
+Centrifugo hooks for [React](https://react.dev/). The provider builds a client from one configuration object and hands Centrifugo's native SDK surface to React. Subscription ownership, sharing, and cleanup come from [simulcast](https://priemskiyyy.github.io/simulcast/) and its Centrifugo adapter, so the channel hooks are that runtime's own, re-exported here unchanged.
 
-Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`. Two optional packages come with it: `react-centrifugo-codegen` generates named hooks from your event map, and `react-centrifugo-devtools` adds a browser panel for connections, channels, and events.
+Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`. Two shared tools work here: `@priemskiyyy/simulcast-codegen` generates named hooks from your event map, and `@priemskiyyy/simulcast-devtools` adds a browser panel for connections, channels, and events.
 
 ## Usage
 
@@ -43,14 +43,22 @@ Configure authentication and channel permissions on your Centrifugo server. The 
 
 ## Hooks
 
-| Hook                                                      | Purpose                                                                         |
-| --------------------------------------------------------- | ------------------------------------------------------------------------------- |
-| `useChannel(channel, handler, options?)`                  | Receive publications; optionally parse their data.                              |
-| `useChannelStatus(channel, onChange?)`                    | Observe subscription state and the latest error without opening a subscription. |
-| `useConnectionState(onChange?)`                           | Read `disconnected`, `connecting`, or `connected`.                              |
-| `useSubscriptionEvent(channel, event, handler, options?)` | Receive native subscription events, including recovery metadata.                |
-| `useClientEvent(event, handler)`                          | Receive native client events.                                                   |
-| `useCentrifuge()`                                         | Access the current native client, or `null` while the session is inactive.      |
+This package's own hooks reach Centrifugo's native SDK surface:
+
+| Hook                                                      | Purpose                                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `useCentrifuge()`                                         | Access the current native client, or `null` while the session is inactive. |
+| `useSubscriptionEvent(channel, event, handler, options?)` | Receive native subscription events such as `join`, `leave`, `subscribed`.  |
+| `useClientEvent(event, handler)`                          | Receive native client events.                                              |
+
+Channel consumption comes from the runtime and is re-exported unchanged:
+
+| Hook                                     | Purpose                                                               |
+| ---------------------------------------- | --------------------------------------------------------------------- |
+| `useChannel(channel, handler, options?)` | Receive publications; optionally parse their data.                    |
+| `useChannelDemand(channel, options?)`    | Hold a channel's subscription open without consuming publications.    |
+| `useChannelStatus(channel, onChange?)`   | Observe subscription state, the last error, and the recovery outcome. |
+| `useConnectionState(onChange?)`          | Read `disconnected`, `connecting`, or `connected`.                    |
 
 [Hook reference](docs/hooks.md) · [Authentication and sessions](docs/configuration.md) · [Errors and recovery](docs/error-handling.md)
 
@@ -58,30 +66,44 @@ Configure authentication and channel permissions on your Centrifugo server. The 
 
 `createChannelEventHooks` maps an event name to its channel and payload types. Applications supply the decoder for their publication format.
 
-The optional `react-centrifugo-codegen` package generates named hooks such as `useMessageCreated` from that map. Generated hooks reference the original payload types. The CLI includes `generate`, `check`, and `watch` commands.
+The optional `@priemskiyyy/simulcast-codegen` package generates named hooks such as `useMessageCreated` from that map. Set its `runtime` to `react-centrifugo` so generated hooks import from here. Generated hooks reference the original payload types. The CLI includes `generate`, `check`, and `watch` commands.
 
 [Typed event guide](docs/typed-events.md) · [Code generation](docs/codegen.md)
 
+## Examples
+
+`examples/react` and `examples/expo` are the same dashboard, on the web and on
+React Native. Both need a Centrifugo server, since this package only ever builds
+a Centrifugo client.
+
+```sh
+pnpm --filter example-react dev
+pnpm --filter example-expo dev
+```
+
 ## Packages
 
-| Package                     | Directory                                            |
-| --------------------------- | ---------------------------------------------------- |
-| `react-centrifugo`          | [Runtime and React hooks](packages/react-centrifugo) |
-| `react-centrifugo-codegen`  | [Optional code generation CLI](packages/codegen)     |
-| `react-centrifugo-devtools` | [Browser devtools panel](packages/devtools)          |
+| Package            | Directory                                |
+| ------------------ | ---------------------------------------- |
+| `react-centrifugo` | [React hooks](packages/react-centrifugo) |
 
-The runtime is ESM and has no React DOM or Effect dependency. React Native device support remains unverified. See [server rendering and platform support](docs/server-rendering.md).
+This repository publishes one package. Code generation and devtools come from
+`@priemskiyyy/simulcast-codegen` and `@priemskiyyy/simulcast-devtools`.
+
+The package is ESM and has no React DOM dependency. It runs on React Native: the repository ships an Expo example that exports iOS and Android bundles. See [server rendering and platform support](docs/server-rendering.md).
+
+The runtime's architecture, adapter contract, and design principles are documented at [priemskiyyy.github.io/simulcast](https://priemskiyyy.github.io/simulcast/).
 
 ## Development
 
-Use Node 24 and the pnpm version declared in `package.json`.
+Use Node 22.18 or newer and the pnpm version declared in `package.json`.
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm check
 ```
 
-`pnpm check` builds all packages and checks types, lint, formatting, unit tests, generated files, the example app, and an isolated package consumer.
+`pnpm check` builds the package and checks types, lint, formatting, unit tests, generated files, the example app, and an isolated package consumer.
 
 For browser tests, start Docker and install the test browsers:
 
@@ -96,7 +118,7 @@ These tests run the built runtime against a pinned Centrifugo server. They cover
 | ------------------------- | ------------------------------------------------------------------ |
 | `pnpm dev:docs`           | Run the documentation site.                                        |
 | `pnpm build:docs`         | Build documentation and check internal links.                      |
-| `pnpm test:unit`          | Run runtime, codegen, and devtools unit tests.                     |
+| `pnpm test:unit`          | Run the hook and provider unit tests.                              |
 | `pnpm test:compatibility` | Check the runtime tarball with minimum and current React versions. |
 | `pnpm check:release`      | Run the complete local release checks.                             |
 

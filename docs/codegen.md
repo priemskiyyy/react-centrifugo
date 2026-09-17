@@ -1,7 +1,8 @@
 # Code generation
 
-`react-centrifugo-codegen` reads your [event map](typed-events.md) and writes one
-named hook per event.
+`@priemskiyyy/simulcast-codegen` reads your [event map](typed-events.md) and
+writes one named hook per event. Point its `runtime` at this package and the
+generated hooks import from it.
 
 ```ts
 // you write this once
@@ -32,7 +33,7 @@ The cost is one config file and a command in CI. Everything in
 ## Install
 
 ```sh
-pnpm add -D react-centrifugo-codegen typescript
+pnpm add -D @priemskiyyy/simulcast-codegen typescript
 ```
 
 Node `>=22.18`, TypeScript `>=5.8 <6`.
@@ -41,34 +42,44 @@ Node `>=22.18`, TypeScript `>=5.8 <6`.
 
 ```json
 {
-  "$schema": "./node_modules/react-centrifugo-codegen/config.schema.json",
+  "$schema": "./node_modules/@priemskiyyy/simulcast-codegen/config.schema.json",
   "events": { "file": "src/realtime/Events.ts", "type": "Events" },
   "dispatcher": {
     "file": "src/realtime/useChannelEvent.ts",
     "export": "useChannelEvent"
   },
-  "output": "src/hooks/generated"
+  "output": "src/hooks/generated",
+  "runtime": "react-centrifugo"
 }
 ```
 
-| Field        | Meaning                                                           |
-| ------------ | ----------------------------------------------------------------- |
-| `events`     | The module and exported type name of your event map               |
-| `dispatcher` | The module and export of your `useChannelEvent`                   |
-| `output`     | Directory for generated hooks                                     |
-| `tsconfig`   | Optional. Defaults to the nearest config above the event-map file |
-| `hookNames`  | Optional. Overrides for generated names                           |
+| Field        | Meaning                                                               |
+| ------------ | --------------------------------------------------------------------- |
+| `events`     | The module and exported type name of your event map                   |
+| `dispatcher` | The module and export of your `useChannelEvent`                       |
+| `output`     | Directory for generated hooks                                         |
+| `runtime`    | The package generated hooks import from. Set it to `react-centrifugo` |
+| `imports`    | Optional. `{ "extension": "js" }` or `{ "extension": "none" }`        |
+| `tsconfig`   | Optional. Defaults to the nearest config above the event-map file     |
+| `hookNames`  | Optional. Overrides for generated names                               |
+
+Without `runtime`, hooks import from the generator's own default binding, which
+is not this package. `examples/react/realtime.config.json` is a working
+configuration.
 
 Paths are relative to the configuration file, and JSON comments are allowed. The
 `$schema` link gives editors completion and validation; it is generated from the
 same schema that validates the file at runtime, so the two cannot drift.
 
+Generated hooks import `ChannelInput`, `PublicationHandler`, and
+`UseChannelOptions` from the runtime. This package exports all three.
+
 ## Run
 
 ```sh
-react-centrifugo-codegen generate   # write hooks
-react-centrifugo-codegen check      # report drift, change nothing, exit 1 if stale
-react-centrifugo-codegen watch      # regenerate as types and config change
+simulcast-codegen generate   # write hooks
+simulcast-codegen check      # report drift, change nothing, exit 1 if stale
+simulcast-codegen watch      # regenerate as types and config change
 ```
 
 Every command takes `--config path/to/config.json`, and running with no command
@@ -93,12 +104,13 @@ a case-insensitive filesystem would silently overwrite one hook with another.
 ## Output and ownership
 
 The output directory holds one file per hook, an `index.ts`, and
-`.react-centrifugo-codegen.json` recording what was generated.
+`.simulcast-codegen.json` recording what was generated.
 
 A stale hook is deleted only if it is listed in that manifest _and_ still
 carries the generated header. Anything else is left alone: if a handwritten file
 sits where a hook would go, generation refuses rather than overwriting it. Do
-not edit generated files or strip their header.
+not edit generated files or strip their header. Files written by an earlier
+generator carry a different header, so move or delete them before the first run.
 
 ## What the event map must be
 
@@ -119,7 +131,7 @@ Codegen does not replace it.
 ## Programmatic use
 
 ```ts
-import { CodegenFailure, generateHooks } from "react-centrifugo-codegen";
+import { CodegenFailure, generateHooks } from "@priemskiyyy/simulcast-codegen";
 
 try {
   const result = generateHooks("realtime.config.json", { check: true });

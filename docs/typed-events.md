@@ -28,8 +28,10 @@ is a compile error.
 
 ## Write the decoder
 
-The decoder pulls an event name and payload out of one publication. Return
-`null` for anything it does not recognise and that publication is ignored.
+The decoder pulls an event name and payload out of one publication. It receives
+the whole publication, so destructure `data` for the payload and read `native`
+when you need Centrifugo's own context. Return `null` for anything it does not
+recognise and that publication is ignored.
 
 ```ts
 // src/realtime/useChannelEvent.ts
@@ -37,7 +39,7 @@ import { createChannelEventHooks } from "react-centrifugo";
 import type { Events } from "./Events";
 
 export const { useChannelEvent } = createChannelEventHooks<Events>({
-  decode: (data) => {
+  decode: ({ data }) => {
     if (typeof data !== "object" || data === null) {
       return null;
     }
@@ -99,7 +101,7 @@ Payload types reference the original event map, so changing a payload's fields
 does not require regeneration.
 
 ```sh
-react-centrifugo-codegen generate
+simulcast-codegen generate
 ```
 
 [Code generation](codegen.md) covers configuration, the `check` and `watch`
