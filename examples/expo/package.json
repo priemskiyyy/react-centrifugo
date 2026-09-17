@@ -1,0 +1,44 @@
+{
+  "name": "example-expo",
+  "private": true,
+  "main": "index.ts",
+  "scripts": {
+    "dev": "expo start",
+    "build": "expo export --platform web --output-dir dist",
+    "generate:hooks": "simulcast-codegen generate",
+    "validate:generated": "simulcast-codegen check",
+    "lint:typescript": "tsc --noEmit -p .",
+    "ios": "expo start --ios",
+    "android": "expo start --android",
+    "web": "expo start --web",
+    "build:native": "expo export --platform ios --platform android --output-dir ../../.artifacts/expo-native",
+    "check:dependencies": "expo install --check"
+  },
+  "dependencies": {
+    "@expo/metro-runtime": "57.0.15",
+    "@formatjs/intl-pluralrules": "^6.3.15",
+    "@formatjs/intl-relativetimeformat": "^12.3.15",
+    "class-variance-authority": "0.7.1",
+    "clsx": "2.1.1",
+    "example-shared": "workspace:*",
+    "expo": "57.0.23",
+    "expo-haptics": "~57.0.3",
+    "expo-status-bar": "57.0.1",
+    "phosphor-react-native": "3.0.6",
+    "react": "19.2.3",
+    "react-centrifugo": "workspace:*",
+    "react-dom": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-safe-area-context": "5.7.0",
+    "react-native-svg": "15.15.4",
+    "react-native-web": "0.21.2",
+    "ts-pattern": "5.9.0",
+    "uniwind": "1.12.0"
+  },
+  "devDependencies": {
+    "@priemskiyyy/simulcast-codegen": "0.4.0",
+    "@types/react": "19.2.17",
+    "tailwindcss": "4.3.3",
+    "typescript": "5.8.3"
+  }
+}

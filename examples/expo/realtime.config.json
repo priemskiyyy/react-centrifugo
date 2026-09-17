@@ -1,0 +1,16 @@
+{
+  "$schema": "../../node_modules/@priemskiyyy/simulcast-codegen/config.schema.json",
+  "events": {
+    "file": "src/realtime/Events.ts",
+    "type": "Events"
+  },
+  "dispatcher": {
+    "file": "src/realtime/useChannelEvent.ts",
+    "export": "useChannelEvent"
+  },
+  "output": "src/hooks/generated",
+  "runtime": "react-centrifugo",
+  "imports": {
+    "extension": "none"
+  }
+}

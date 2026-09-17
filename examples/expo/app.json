@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Mission Control",
+    "slug": "react-centrifugo-mission-control",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "scheme": "react-centrifugo",
+    "userInterfaceStyle": "automatic",
+    "newArchEnabled": true,
+    "web": {
+      "bundler": "metro",
+      "output": "single"
+    }
+  }
+}
