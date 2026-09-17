@@ -44,19 +44,15 @@ Passing a new object literal every render does **not** reconnect. Only
 
 ## What is read when
 
-Configuration is read at two points:
+The configuration is read when a session starts. The client keeps the
+`transport`, `options`, and `getSubscriptionOptions` of that render until the
+session is replaced, so passing new ones to a running session changes nothing.
+Change `session.id` to apply them.
 
-- **`transport` and `options` are read once**, while the client is constructed.
-  To change a transport or a structural client option, change `session.id`, or
-  disable and re-enable the session.
-- **Everything else is read when it is needed.** `getSubscriptionOptions` runs
-  each time a channel is acquired. Token and data callbacks run each time the
-  SDK asks for credentials, and always see your latest props.
-
-One consequence: whether a callback _exists_ is fixed when its client or
-subscription is created. Supply `getToken` from the start and change what it
-returns; adding it later to an existing session has no effect until the session
-is replaced.
+Within a session, `getSubscriptionOptions` runs once per channel, when the
+subscription is created. The `getToken` it returns runs whenever Centrifugo asks
+for a subscription token, including refreshes. Keep that callback reading from
+somewhere it can stay current, such as a store or a module-level accessor.
 
 ## Authentication
 
@@ -79,10 +75,10 @@ Connection credentials go in `options`, per-channel credentials in
 Return an empty object for channels that need no subscription token. Centrifugo
 still applies the connection identity and the server's channel permissions.
 
-When a session ends, credential callbacks belonging to it stop: queued calls are
-rejected and late results are discarded, so a released session cannot fetch or
-apply fresh credentials. Requests already in flight in your own code are not
-cancelled. The library ignores their results.
+When a session ends, its client disconnects and its subscriptions are removed,
+so Centrifugo stops asking it for credentials. A token request your own code has
+already started is not cancelled; its result reaches a disconnected client and
+has no effect.
 
 ## Per-hook enabling
 
