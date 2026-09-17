@@ -1,6 +1,6 @@
 {
   "name": "react-centrifugo",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "React hooks for Centrifugo realtime messaging: shared WebSocket subscriptions, typed publications and events, connection state, and SSR-safe cleanup.",
   "type": "module",
   "license": "MIT",

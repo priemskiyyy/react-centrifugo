@@ -1,5 +1,20 @@
 # Changelog
 
+## react-centrifugo 0.3.0 — 2026-09-17
+
+The hooks now run on [simulcast](https://priemskiyyy.github.io/simulcast/) and its Centrifugo adapter, which own subscription sharing and cleanup. `useChannel`, `useChannelDemand`, `useChannelStatus`, `useConnectionState`, and `createChannelEventHooks` are re-exported from `@priemskiyyy/simulcast-react` unchanged. This package keeps the three hooks that reach Centrifugo's native SDK surface.
+
+- **Breaking.** A publication handler's second argument is the runtime publication, `{ data, event?, native }`. Centrifugo's own context, with its offset and tags, moved to `native`.
+- **Breaking.** `createChannelEventHooks` decodes the whole publication rather than its data. Destructure `data` to keep the previous behaviour.
+- **Breaking.** `ChannelStatus.error` carries the adapter error untyped, as `{ error: unknown }`, instead of Centrifugo's `SubscriptionErrorContext`.
+- **Breaking.** The `react-centrifugo/devtools` entry is gone. Install `@priemskiyyy/simulcast-devtools` and mount its panel.
+- **Breaking.** `react-centrifugo-codegen` and `react-centrifugo-devtools` are no longer published from this repository. `@priemskiyyy/simulcast-codegen` and `@priemskiyyy/simulcast-devtools` replace them; set the codegen `runtime` to `react-centrifugo`.
+- **Breaking.** A session reads the configuration of the render that starts it. Credential callbacks handed to a running session no longer reach it; change `session.id` to apply them.
+- Add `useChannelDemand`, which holds a channel's subscription open without consuming publications.
+- Export `CentrifugeRealtimeClient`. Registering it with `@priemskiyyy/simulcast-react` types every re-exported hook with Centrifugo's native types.
+- Report recovery on channel status: `recovered` says whether Centrifugo replayed the publications missed since the last subscription.
+- Add an Expo example that runs the web example's dashboard on React Native.
+
 ## react-centrifugo 0.2.0 — 2026-09-14
 
 - Add a passive diagnostics bridge through `react-centrifugo/devtools` for connection, channel, and event inspection.
