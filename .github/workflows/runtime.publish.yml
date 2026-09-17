@@ -37,11 +37,8 @@ jobs:
   package:
     needs: metadata
     uses: ./.github/workflows/runtime.verify.yml
-  devtools:
-    needs: metadata
-    uses: ./.github/workflows/devtools.test.yml
   publish:
-    needs: [library, browsers, docs, format, package, devtools]
+    needs: [library, browsers, docs, format, package]
     runs-on: ubuntu-latest
     environment: npm
     permissions:

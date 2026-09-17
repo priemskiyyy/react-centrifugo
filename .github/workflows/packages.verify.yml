@@ -39,24 +39,8 @@ jobs:
       - name: Build packages
         run: pnpm build
 
-      # Packs both packages, lints them with publint, then installs them into a
+      # Packs the package, lints it with publint, then installs it into a
       # throwaway consumer to check exports, generated types, SSR, browser
-      # bundling, CLI drift detection, and watcher shutdown.
+      # bundling, and the shared CLI against the published hooks.
       - name: Packaged consumer
         run: pnpm test:package
-
-      - name: Upload verified codegen package
-        uses: actions/upload-artifact@v4
-        with:
-          name: codegen-release
-          path: .artifacts/codegen-release/
-          if-no-files-found: error
-          retention-days: 14
-
-      - name: Upload verified devtools package
-        uses: actions/upload-artifact@v4
-        with:
-          name: devtools-release
-          path: .artifacts/devtools-release/
-          if-no-files-found: error
-          retention-days: 14
