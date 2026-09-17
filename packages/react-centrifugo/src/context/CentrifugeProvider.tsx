@@ -1,8 +1,10 @@
-import { useEffect, useEffectEvent, useState } from "react";
+import { useMemo } from "react";
 import type { PropsWithChildren } from "react";
+import { RealtimeClient } from "@priemskiyyy/simulcast";
+import { RealtimeProvider } from "@priemskiyyy/simulcast-react";
+import { RealtimeClientContext } from "src/context/RealtimeClientContext";
 import type { CentrifugeConfiguration } from "src/types/CentrifugeConfiguration";
-import { RealtimeClientStore } from "src/utils/RealtimeClientStore";
-import { RealtimeStoreContext } from "src/context/RealtimeStoreContext";
+import { createCentrifugoAdapter } from "src/utils/createCentrifugoAdapter";
 
 export type CentrifugeProviderProps = PropsWithChildren<{
   configuration: CentrifugeConfiguration;
@@ -27,23 +29,26 @@ export const CentrifugeProvider = ({
   configuration,
   children,
 }: CentrifugeProviderProps) => {
-  const [store] = useState(() => new RealtimeClientStore());
+  const { id, enabled = true } = configuration.session;
 
-  const getConfiguration = useEffectEvent(() => configuration);
+  const client = useMemo(
+    () =>
+      new RealtimeClient({
+        adapter: createCentrifugoAdapter(configuration),
+      }),
+    // A new session reads the configuration of the render that starts it, as
+    // the previous runtime did when it began one.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [id],
+  );
 
-  const enabled = configuration.session.enabled ?? true;
-
-  useEffect(() => {
-    if (!enabled) {
-      return;
-    }
-
-    return store.session.set({ get: getConfiguration });
-  }, [store, configuration.session.id, enabled]);
-
+  // The binding owns the session, and its provider also lets the shared
+  // devtools and any simulcast hook work inside this one.
   return (
-    <RealtimeStoreContext.Provider value={store.api}>
-      {children}
-    </RealtimeStoreContext.Provider>
+    <RealtimeClientContext.Provider value={client}>
+      <RealtimeProvider client={client} session={{ id, enabled }}>
+        {children}
+      </RealtimeProvider>
+    </RealtimeClientContext.Provider>
   );
 };

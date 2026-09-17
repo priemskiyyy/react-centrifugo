@@ -1,6 +1,7 @@
 import type { ClientEvents } from "centrifuge";
 import { useEffect, useEffectEvent } from "react";
-import { useRealtimeStore } from "src/hooks/internal/useRealtimeStore";
+import { useCentrifuge } from "src/hooks/useCentrifuge";
+import type { NativeEmitter } from "src/types/internal/NativeEmitter";
 import type { RealtimeEventHandler } from "src/types/internal/RealtimeEventHandler";
 
 /**
@@ -18,13 +19,23 @@ export const useClientEvent = <TEvent extends keyof ClientEvents>(
   event: TEvent,
   onEvent: RealtimeEventHandler<Parameters<ClientEvents[TEvent]>[0]>,
 ) => {
-  const store = useRealtimeStore();
+  const client = useCentrifuge();
 
   const handleEvent = useEffectEvent(onEvent);
 
   useEffect(() => {
-    return store.client.events.subscribe(event, (context) =>
-      handleEvent(context),
-    );
-  }, [store, event]);
+    if (client === null) {
+      return;
+    }
+
+    const emitter: NativeEmitter<ClientEvents> = client;
+    const listener = (context: Parameters<ClientEvents[TEvent]>[0]) => {
+      handleEvent(context);
+    };
+    emitter.on(event, listener);
+
+    return () => {
+      emitter.off(event, listener);
+    };
+  }, [client, event]);
 };

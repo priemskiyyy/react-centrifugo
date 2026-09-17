@@ -5,14 +5,13 @@ import { StrictMode } from "react";
 import type { PropsWithChildren } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
 import { CentrifugeProvider } from "src/context/CentrifugeProvider";
-import { createChannelEventHooks } from "src/hooks/createChannelEventHooks";
-import { useChannel } from "src/hooks/useChannel";
-import { useChannelStatus } from "src/hooks/useChannelStatus";
+import { createChannelEventHooks } from "src/index";
+import { useChannel } from "src/index";
+import { useChannelStatus } from "src/index";
 import { useCentrifuge } from "src/hooks/useCentrifuge";
 import { useClientEvent } from "src/hooks/useClientEvent";
-import { useConnectionState } from "src/hooks/useConnectionState";
+import { useConnectionState } from "src/index";
 import { useSubscriptionEvent } from "src/hooks/useSubscriptionEvent";
-import { useRealtimeStore } from "src/hooks/internal/useRealtimeStore";
 import type { CentrifugeConfiguration } from "src/types/CentrifugeConfiguration";
 
 const configuration: CentrifugeConfiguration = {
@@ -59,21 +58,16 @@ beforeEach(() => {
 afterEach(cleanup);
 
 describe("provider and subscriptions", () => {
-  test("exposes a stable observation view while the provider owns session cleanup", () => {
-    const { result, rerender, unmount } = renderHook(useRealtimeStore, {
+  test("exposes the native client while the provider owns session cleanup", () => {
+    const { result, rerender, unmount } = renderHook(useCentrifuge, {
       wrapper,
     });
-    const view = result.current;
-    expect(view).not.toHaveProperty("session");
-    expect(Object.getPrototypeOf(view)).toBe(Object.prototype);
-    expect(Object.getPrototypeOf(view.channels)).toBe(Object.prototype);
-    expect(view.client.get()).toBeInstanceOf(Centrifuge);
+    const client = result.current;
 
+    expect(client).toBeInstanceOf(Centrifuge);
     rerender();
-    expect(result.current).toBe(view);
+    expect(result.current).toBe(client);
     unmount();
-    expect(view.client.get()).toBeNull();
-    expect(view.connection.get()).toBe("disconnected");
   });
 
   test("requires an explicit provider", () => {
@@ -177,9 +171,12 @@ describe("provider and subscriptions", () => {
         offset: 7,
       });
     });
+    // The provider's own context arrives under `native`.
     expect(first).toHaveBeenCalledWith(
       "first",
-      expect.objectContaining({ offset: 7 }),
+      expect.objectContaining({
+        native: expect.objectContaining({ offset: 7 }),
+      }),
     );
     expect(second).toHaveBeenCalledTimes(1);
     rerender({ enabled: false });
@@ -267,7 +264,14 @@ describe("provider and subscriptions", () => {
         error: { code: 1, message: "retry" },
       });
     });
-    expect(result.current.status.error?.error.message).toBe("retry");
+    // The runtime keeps the provider's error as it arrived, untyped.
+    expect(result.current.status.error).toEqual({
+      error: {
+        channel: "rooms:one",
+        type: "subscribe",
+        error: { code: 1, message: "retry" },
+      },
+    });
     act(() => {
       subscription.emit("state", {
         channel: "rooms:one",
@@ -436,7 +440,8 @@ describe("parsing and typed events", () => {
       "message.created": { channel: `rooms:${string}`; payload: string };
     };
     const { useChannelEvent } = createChannelEventHooks<Events>({
-      decode: (data) => {
+      // The runtime hands the decoder the whole publication.
+      decode: ({ data }) => {
         if (
           typeof data !== "object" ||
           data === null ||
@@ -472,7 +477,9 @@ describe("parsing and typed events", () => {
     expect(parse).toHaveBeenCalledExactlyOnceWith(42);
     expect(onMessage).toHaveBeenCalledWith(
       "42",
-      expect.objectContaining({ channel: "rooms:one" }),
+      expect.objectContaining({
+        native: expect.objectContaining({ channel: "rooms:one" }),
+      }),
     );
   });
 });

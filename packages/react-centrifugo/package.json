@@ -28,10 +28,6 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./devtools": {
-      "types": "./dist/devtools.d.ts",
-      "import": "./dist/devtools.js"
     }
   },
   "scripts": {
@@ -59,5 +55,10 @@
     "typed-events",
     "typescript",
     "ssr"
-  ]
+  ],
+  "dependencies": {
+    "@priemskiyyy/simulcast": ">=0.4.0 <0.5",
+    "@priemskiyyy/simulcast-centrifugo": ">=0.4.0 <0.5",
+    "@priemskiyyy/simulcast-react": ">=0.4.0 <0.5"
+  }
 }

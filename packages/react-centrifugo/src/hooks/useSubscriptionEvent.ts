@@ -1,7 +1,8 @@
 import type { SubscriptionEvents } from "centrifuge";
 import { useEffect, useEffectEvent } from "react";
-import { useRealtimeStore } from "src/hooks/internal/useRealtimeStore";
-
+import { useChannelDemand } from "@priemskiyyy/simulcast-react";
+import { useNativeChannel } from "src/hooks/internal/useNativeChannel";
+import type { NativeEmitter } from "src/types/internal/NativeEmitter";
 import type { RealtimeEventHandler } from "src/types/internal/RealtimeEventHandler";
 
 export type UseSubscriptionEventOptions = {
@@ -26,19 +27,30 @@ export const useSubscriptionEvent = <TEvent extends keyof SubscriptionEvents>(
   onEvent: RealtimeEventHandler<Parameters<SubscriptionEvents[TEvent]>[0]>,
   options: UseSubscriptionEventOptions = {},
 ) => {
-  const store = useRealtimeStore();
+  const subscription = useNativeChannel(channel);
 
   const enabled = options.enabled ?? true;
 
   const handleEvent = useEffectEvent(onEvent);
 
+  // IMPORTANT
+  // This listener needs a native subscription to exist, and observing one
+  // never opens it.
+  useChannelDemand(channel, { enabled });
+
   useEffect(() => {
-    if (!enabled) {
+    if (!enabled || subscription === null) {
       return;
     }
 
-    return store.channels
-      .get(channel)
-      .events.subscribe(event, (context) => handleEvent(context));
-  }, [store, channel, event, enabled]);
+    const emitter: NativeEmitter<SubscriptionEvents> = subscription;
+    const listener = (context: Parameters<SubscriptionEvents[TEvent]>[0]) => {
+      handleEvent(context);
+    };
+    emitter.on(event, listener);
+
+    return () => {
+      emitter.off(event, listener);
+    };
+  }, [subscription, event, enabled]);
 };

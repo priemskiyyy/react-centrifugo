@@ -1,27 +1,20 @@
-import { useObservableValue } from "src/hooks/internal/useObservableValue";
-import { useRealtimeStore } from "src/hooks/internal/useRealtimeStore";
+import type { Centrifuge } from "centrifuge";
+import { useSyncExternalStore } from "react";
+import { useRealtimeClient } from "src/hooks/internal/useRealtimeClient";
 
-const getServerClient = () => null;
+const getServerClient = (): Centrifuge | null => null;
 
 /**
- * Returns the current native client and rerenders when the session replaces or releases it.
- * Returns `null` before setup, during server rendering, or while the session is inactive.
- * Use `useConnectionState` to observe connection state changes on the same client.
+ * The current native client, or `null` while no session is active.
  *
  * @example
  * ```ts
  * const client = useCentrifuge();
- * const sendMessage = async (text: string) => {
- *   if (client === null) {
- *     return;
- *   }
- *
- *   await client.publish("rooms:general", { text });
- * };
+ * await client?.publish("rooms:general", { text: "hello" });
  * ```
  */
 export const useCentrifuge = () => {
-  const store = useRealtimeStore();
+  const { native } = useRealtimeClient();
 
-  return useObservableValue(store.client, getServerClient);
+  return useSyncExternalStore(native.subscribe, native.get, getServerClient);
 };

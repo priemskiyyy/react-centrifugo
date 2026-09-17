@@ -5,9 +5,9 @@ import { hydrateRoot } from "react-dom/client";
 import { renderToString } from "react-dom/server";
 import { expect, test, vi } from "vitest";
 import { CentrifugeProvider } from "src/context/CentrifugeProvider";
-import { useChannel } from "src/hooks/useChannel";
-import { useChannelStatus } from "src/hooks/useChannelStatus";
-import { useConnectionState } from "src/hooks/useConnectionState";
+import { useChannel } from "src/index";
+import { useChannelStatus } from "src/index";
+import { useConnectionState } from "src/index";
 import { useCentrifuge } from "src/hooks/useCentrifuge";
 
 test("SSR is inert and hydrates from the same snapshots before connecting", async () => {

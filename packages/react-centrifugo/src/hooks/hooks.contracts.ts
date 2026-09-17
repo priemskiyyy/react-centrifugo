@@ -1,8 +1,8 @@
 import { expectTypeOf } from "vitest";
 import type { Centrifuge } from "centrifuge";
 import { useCentrifuge } from "src/hooks/useCentrifuge";
-import { useChannel } from "src/hooks/useChannel";
-import { createChannelEventHooks } from "src/hooks/createChannelEventHooks";
+import { useChannel } from "src/index";
+import { createChannelEventHooks } from "src/index";
 
 type Message = { text: string };
 type Events = {
