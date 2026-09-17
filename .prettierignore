@@ -2,6 +2,8 @@ pnpm-lock.yaml
 dist
 node_modules
 .artifacts
-examples/react/src/hooks/generated
+examples/*/src/hooks/generated
+examples/expo/src/uniwind-types.d.ts
+.expo
 docs/.vitepress/dist
 docs/.vitepress/cache

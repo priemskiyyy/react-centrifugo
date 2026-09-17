@@ -8,12 +8,10 @@ allowBuilds:
   msgpackr-extract: false
   protobufjs: false
 
-# Mermaid's dependencies are listed in the VitePress plugin's optimizeDeps, which
-# Vite resolves from the workspace root. Hoist just those so the docs dev server
-# can pre-bundle them.
-publicHoistPattern:
-  - "@braintree/sanitize-url"
-  - cytoscape
-  - cytoscape-cose-bilkent
-  - dayjs
-  - debug
+# Published today; the workspace's minimum release age would reject them.
+minimumReleaseAgeExclude:
+  - "@priemskiyyy/simulcast@0.4.0"
+  - "@priemskiyyy/simulcast-centrifugo@0.4.0"
+  - "@priemskiyyy/simulcast-codegen@0.4.0"
+  - "@priemskiyyy/simulcast-devtools@0.4.0"
+  - "@priemskiyyy/simulcast-react@0.4.0"

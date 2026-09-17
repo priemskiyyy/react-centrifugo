@@ -7,7 +7,7 @@
     "node": ">=22.18.0"
   },
   "scripts": {
-    "build": "pnpm --filter react-centrifugo --filter react-centrifugo-codegen --filter react-centrifugo-devtools build",
+    "build": "pnpm --filter react-centrifugo build",
     "build:docs": "vitepress build docs",
     "dev:docs": "vitepress dev docs",
     "preview:docs": "vitepress preview docs",
@@ -18,10 +18,10 @@
     "test:unit": "vitest run",
     "test:unit:watch": "vitest",
     "test:package": "node scripts/verify-packages.mjs",
-    "generate:hooks": "pnpm --filter example-react generate:hooks",
-    "validate:generated": "pnpm --filter example-react validate:generated",
-    "check": "pnpm build && pnpm generate:hooks && pnpm lint:typescript && pnpm lint:eslint && pnpm lint:prettier && pnpm test:unit && pnpm validate:generated && pnpm --filter example-react build && pnpm test:package",
-    "test:browser": "pnpm --filter react-centrifugo --filter react-centrifugo-devtools build && tsc --noEmit -p tests/browser && playwright test -c tests/browser/playwright.config.ts",
+    "generate:hooks": "pnpm -r --filter './examples/*' generate:hooks",
+    "validate:generated": "pnpm -r --filter './examples/*' validate:generated",
+    "check": "pnpm build && pnpm generate:hooks && pnpm lint:typescript && pnpm lint:eslint && pnpm lint:prettier && pnpm test:unit && pnpm validate:generated && pnpm -r --filter './examples/*' build && pnpm test:package",
+    "test:browser": "pnpm --filter react-centrifugo build && tsc --noEmit -p tests/browser && playwright test -c tests/browser/playwright.config.ts",
     "test:compatibility": "pnpm --filter react-centrifugo build && node scripts/verify-runtime-package.mjs",
     "verify:release": "node scripts/verify-release.mjs",
     "check:release": "pnpm check && pnpm build:docs && pnpm test:browser && pnpm test:compatibility && pnpm verify:release"
@@ -29,6 +29,8 @@
   "devDependencies": {
     "@eslint/js": "9.39.4",
     "@playwright/test": "1.63.0",
+    "@priemskiyyy/simulcast-codegen": "0.4.0",
+    "@priemskiyyy/simulcast-devtools": "0.4.0",
     "@testing-library/react": "16.3.3",
     "@types/node": "22.20.2",
     "@types/react": "19.2.17",
@@ -38,7 +40,6 @@
     "eslint": "9.39.4",
     "eslint-plugin-react-hooks": "7.1.1",
     "jsdom": "27.4.0",
-    "mermaid": "^11.17.2",
     "prettier": "3.9.6",
     "publint": "0.3.24",
     "react": "19.2.8",
@@ -48,7 +49,6 @@
     "typescript-eslint": "8.70.0",
     "vite": "8.3.0",
     "vitepress": "1.6.4",
-    "vitepress-plugin-mermaid": "2.0.17",
     "vitest": "4.1.10",
     "ws": "8.21.3"
   }

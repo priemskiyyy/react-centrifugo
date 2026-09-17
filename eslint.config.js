@@ -6,9 +6,11 @@ export default tseslint.config(
   {
     ignores: [
       "**/dist/**",
+      "**/.expo/**",
       "**/node_modules/**",
       ".artifacts/**",
       "**/generated/**",
+      "examples/expo/src/uniwind-types.d.ts",
       "docs/.vitepress/cache/**",
     ],
   },
@@ -40,5 +42,17 @@ export default tseslint.config(
         AbortSignal: "readonly",
       },
     },
+  },
+  {
+    // Metro's config is CommonJS, as Expo requires.
+    files: ["examples/expo/metro.config.js"],
+    languageOptions: {
+      globals: {
+        require: "readonly",
+        module: "writable",
+        __dirname: "readonly",
+      },
+    },
+    rules: { "@typescript-eslint/no-require-imports": "off" },
   },
 );

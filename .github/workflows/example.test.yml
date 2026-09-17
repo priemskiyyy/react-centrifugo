@@ -9,7 +9,7 @@ on:
       - "pnpm-lock.yaml"
       - ".github/actions/setup/**"
       - ".github/workflows/example.test.yml"
-      - "examples/react/**"
+      - "examples/**"
       - "packages/**"
   push:
     branches:
@@ -19,7 +19,7 @@ on:
       - "pnpm-lock.yaml"
       - ".github/actions/setup/**"
       - ".github/workflows/example.test.yml"
-      - "examples/react/**"
+      - "examples/**"
       - "packages/**"
 
 permissions:
@@ -40,13 +40,10 @@ jobs:
         run: pnpm build
 
       - name: Generated hooks are current
-        working-directory: examples/react
         run: pnpm validate:generated
 
       - name: Linting Typescript
-        working-directory: examples/react
-        run: pnpm lint:typescript
+        run: pnpm -r --filter './examples/*' lint:typescript
 
-      - name: Build static export
-        working-directory: examples/react
-        run: pnpm build
+      - name: Build static exports
+        run: pnpm -r --filter './examples/*' build

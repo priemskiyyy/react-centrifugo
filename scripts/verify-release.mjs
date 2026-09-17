@@ -6,14 +6,6 @@ const packages = {
     directory: "packages/react-centrifugo",
     homepage: "https://priemskiyyy.github.io/react-centrifugo/",
   },
-  "react-centrifugo-codegen": {
-    directory: "packages/codegen",
-    homepage: "https://priemskiyyy.github.io/react-centrifugo/codegen",
-  },
-  "react-centrifugo-devtools": {
-    directory: "packages/devtools",
-    homepage: "https://priemskiyyy.github.io/react-centrifugo/devtools",
-  },
 };
 const selected = process.argv.slice(2);
 const names = selected.length === 0 ? Object.keys(packages) : selected;

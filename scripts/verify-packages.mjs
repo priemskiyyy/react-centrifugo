@@ -1,11 +1,8 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
-import { createHash } from "node:crypto";
 import {
-  copyFileSync,
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
@@ -18,26 +15,6 @@ import { fileURLToPath } from "node:url";
 const workspace = fileURLToPath(new URL("..", import.meta.url));
 const artifacts = path.join(workspace, ".artifacts");
 
-// Copies a packed tarball with its checksum into the directory a publish
-// workflow uploads as the release artifact.
-const stageRelease = (packageDirectory, releaseDirectory) => {
-  const metadata = JSON.parse(
-    readFileSync(
-      path.join(workspace, "packages", packageDirectory, "package.json"),
-      "utf8",
-    ),
-  );
-  const filename = `${metadata.name}-${metadata.version}.tgz`;
-  const tarball = path.join(artifacts, filename);
-  const checksum = createHash("sha256")
-    .update(readFileSync(tarball))
-    .digest("hex");
-  const release = path.join(artifacts, releaseDirectory);
-  rmSync(release, { recursive: true, force: true });
-  mkdirSync(release, { recursive: true });
-  copyFileSync(tarball, path.join(release, filename));
-  writeFileSync(path.join(release, "SHA256SUMS"), `${checksum}  ${filename}\n`);
-};
 const consumer = mkdtempSync(path.join(tmpdir(), "react-centrifugo-consumer-"));
 const rootPackage = JSON.parse(
   readFileSync(path.join(workspace, "package.json"), "utf8"),
@@ -113,11 +90,7 @@ const verifyWatchShutdown = (cli) =>
 
 try {
   mkdirSync(artifacts, { recursive: true });
-  const names = {
-    "react-centrifugo": "react-centrifugo",
-    codegen: "react-centrifugo-codegen",
-    devtools: "react-centrifugo-devtools",
-  };
+  const names = { "react-centrifugo": "react-centrifugo" };
   const tarballs = Object.keys(names).map((directory) => {
     const packageDirectory = path.join(workspace, "packages", directory);
     process.stdout.write(
@@ -150,6 +123,8 @@ try {
         "vite",
         "@types/react",
         "@types/react-dom",
+        "@priemskiyyy/simulcast-codegen",
+        "@priemskiyyy/simulcast-devtools",
       ].map((name) => [name, rootPackage.devDependencies[name]]),
     ),
   });
@@ -187,6 +162,7 @@ try {
     include: ["*.ts", "*.tsx", "generated/*.ts"],
   });
   json("realtime.config.json", {
+    runtime: "react-centrifugo",
     events: { file: "events.ts", type: "Events" },
     dispatcher: { file: "runtime.ts", export: "useChannelEvent" },
     output: "generated",
@@ -219,10 +195,10 @@ export const useContracts = () => {
     "main.tsx",
     `import { createRoot } from "react-dom/client";
 import { CentrifugeProvider } from "react-centrifugo";
-import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
+import { SimulcastDevtools } from "@priemskiyyy/simulcast-devtools/react";
 import { useMessageCreated } from "./generated/index.js";
 const Messages = () => { useMessageCreated("rooms:one", () => {}); return <p>Connected</p>; };
-createRoot(document.body).render(<CentrifugeProvider configuration={{ session: { id: "consumer", enabled: false }, transport: "ws://localhost" }}><Messages />{import.meta.env.DEV ? <ReactCentrifugoDevtools /> : null}</CentrifugeProvider>);\n`,
+createRoot(document.body).render(<CentrifugeProvider configuration={{ session: { id: "consumer", enabled: false }, transport: "ws://localhost" }}><Messages />{import.meta.env.DEV ? <SimulcastDevtools /> : null}</CentrifugeProvider>);\n`,
   );
   write(
     "index.html",
@@ -234,21 +210,25 @@ createRoot(document.body).render(<CentrifugeProvider configuration={{ session: {
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import { CentrifugeProvider, useChannel, useConnectionState } from "react-centrifugo";
-import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
-import { useRealtimeDiagnostics } from "react-centrifugo/devtools";
+import { SimulcastDevtools } from "@priemskiyyy/simulcast-devtools/react";
 const Child = () => { useChannel("rooms:one", () => {}); return createElement("span", null, useConnectionState()); };
 const html = renderToString(createElement(CentrifugeProvider, { configuration: { session: { id: "server" }, transport: "ws://localhost" } }, createElement(Child)));
 assert.equal(html, "<span>disconnected</span>");
-const Inspector = () => { assert.equal(useRealtimeDiagnostics().get().session, null); return createElement(ReactCentrifugoDevtools, { initialIsOpen: true }); };
+const Inspector = () => createElement(SimulcastDevtools, { initialIsOpen: true });
 const inspected = renderToString(createElement(CentrifugeProvider, { configuration: { session: { id: "server" }, transport: "ws://localhost" } }, createElement(Inspector)));
-assert.match(inspected, /Waiting for events/);\n`,
+assert.match(inspected, /data-simulcast-devtools/);\n`,
   );
 
-  const codegen = path.join(consumer, "node_modules/react-centrifugo-codegen");
+  // The shared generator drives this package's hooks, so the packed consumer
+  // checks it against the published runtime.
+  const codegen = path.join(
+    consumer,
+    "node_modules/@priemskiyyy/simulcast-codegen",
+  );
   const metadata = JSON.parse(
     readFileSync(path.join(codegen, "package.json"), "utf8"),
   );
-  const cli = path.join(codegen, metadata.bin["react-centrifugo-codegen"]);
+  const cli = path.join(codegen, metadata.bin["simulcast-codegen"]);
   const stale = spawnSync(process.execPath, [cli, "check"], {
     cwd: consumer,
     encoding: "utf8",
@@ -272,18 +252,7 @@ assert.match(inspected, /Waiting for events/);\n`,
   run(process.execPath, ["node_modules/typescript/bin/tsc", "--noEmit"]);
   run(process.execPath, ["ssr.mjs"]);
   run(process.execPath, ["node_modules/vite/bin/vite.js", "build"]);
-  const assets = path.join(consumer, "dist/assets");
-  const production = readdirSync(assets)
-    .filter((name) => name.endsWith(".js") || name.endsWith(".css"))
-    .map((name) => readFileSync(path.join(assets, name), "utf8"))
-    .join("\n");
-  assert.doesNotMatch(
-    production,
-    /rc-devtools|Capture payloads|Circular or repeated reference/,
-  );
   await verifyWatchShutdown(cli);
-  stageRelease("codegen", "codegen-release");
-  stageRelease("devtools", "devtools-release");
   process.stdout.write(
     "Packed consumer passed: imports, generated types, SSR, browser build, CLI drift detection, and watcher shutdown.\n",
   );

@@ -1,6 +1,6 @@
 import { StrictMode, useActionState, useEffect, useState } from "react";
 import { createRoot } from "react-dom/client";
-import { ReactCentrifugoDevtools } from "react-centrifugo-devtools";
+import { SimulcastDevtools } from "@priemskiyyy/simulcast-devtools/react";
 import "./styles.css";
 import type { Centrifuge, Subscription, SubscriptionEvents } from "centrifuge";
 import {
@@ -316,7 +316,7 @@ const Application = () => {
         >
           <Session user={user} />
           {parameters.has("devtools") ? (
-            <ReactCentrifugoDevtools initialIsOpen maxEvents={100} />
+            <SimulcastDevtools initialIsOpen maxEvents={100} />
           ) : null}
         </CentrifugeProvider>
       )}

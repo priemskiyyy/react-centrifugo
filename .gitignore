@@ -5,8 +5,10 @@ node_modules/
 .env.*
 !.env.example
 dist/
+.expo/
 coverage/
 .artifacts/
 *.tgz
 docs/.vitepress/dist/
+.expo/
 docs/.vitepress/cache/
