@@ -99,7 +99,7 @@ for (const react of new Set(versions)) {
     const bundle = readFileSync(path.join(installed, "dist/index.js"), "utf8");
     assert.match(bundle, /^"use client";/);
     assert.doesNotMatch(bundle, /from ["']src\//);
-    assert.doesNotMatch(bundle, /from ["']effect/);
+    assert.match(bundle, /from ["']@priemskiyyy\/simulcast-react["']/);
     const declarations = readFileSync(
       path.join(installed, "dist/index.d.ts"),
       "utf8",
@@ -107,7 +107,7 @@ for (const react of new Set(versions)) {
     assert.match(declarations, /@example/);
     assert.doesNotMatch(
       declarations,
-      /RealtimeClientStore|RealtimeChannels|ResourceScope/,
+      /useNativeChannel|useRealtimeClient|NativeEmitter/,
     );
     write(
       "tsconfig.json",
@@ -128,13 +128,18 @@ for (const react of new Set(versions)) {
     write(
       "contracts.ts",
       `import type { Centrifuge } from "centrifuge";
-import { useCentrifuge, useChannel, createChannelEventHooks } from "react-centrifugo";
+import type { CentrifugeRealtimeClient } from "react-centrifugo";
+import { useCentrifuge, useChannel, useChannelDemand, createChannelEventHooks } from "react-centrifugo";
+declare module "@priemskiyyy/simulcast-react" {
+  interface Register { client: CentrifugeRealtimeClient }
+}
 type Equal<A, B> = (<T>() => T extends A ? 1 : 2) extends (<T>() => T extends B ? 1 : 2) ? true : false;
 const { useChannelEvent } = createChannelEventHooks<{ "message.created": { channel: \`rooms:\${string}\`; payload: { text: string } } }>({ decode: () => null });
 export const useContracts = () => {
   const client = useCentrifuge();
   const nullableClient: Equal<typeof client, Centrifuge | null> = true;
-  useChannel<{ text: string }>("room", message => { message.text.toUpperCase(); });
+  useChannel<{ text: string }>("room", (message, publication) => { message.text.toUpperCase(); publication.native.offset?.toFixed(); });
+  useChannelDemand("room");
   useChannel("count", count => { count.toFixed(); }, { parse: Number });
   useChannelEvent("rooms:one", "message.created", message => { message.text.toUpperCase(); });
   // @ts-expect-error Channel must match the selected event.
@@ -150,7 +155,7 @@ export const useContracts = () => {
 import { createElement } from "react";
 import { renderToString } from "react-dom/server";
 import * as api from "react-centrifugo";
-assert.deepEqual(Object.keys(api).sort(), ["CentrifugeProvider", "createChannelEventHooks", "useCentrifuge", "useChannel", "useChannelStatus", "useClientEvent", "useConnectionState", "useSubscriptionEvent"].sort());
+assert.deepEqual(Object.keys(api).sort(), ["CentrifugeProvider", "createChannelEventHooks", "useCentrifuge", "useChannel", "useChannelDemand", "useChannelStatus", "useClientEvent", "useConnectionState", "useSubscriptionEvent"].sort());
 const Child = () => { api.useChannel("room", () => {}); assert.equal(api.useCentrifuge(), null); return createElement("span", null, api.useConnectionState()); };
 const html = renderToString(createElement(api.CentrifugeProvider, { configuration: { session: { id: "ssr" }, transport: "ws://localhost" } }, createElement(Child)));
 assert.equal(html, "<span>disconnected</span>");\n`,
