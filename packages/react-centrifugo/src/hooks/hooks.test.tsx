@@ -273,17 +273,27 @@ describe("provider and subscriptions", () => {
       },
     });
     act(() => {
-      subscription.emit("state", {
+      // The adapter takes `subscribed` from the SDK's own event, because that
+      // one carries the recovery result.
+      subscription.emit("subscribed", {
         channel: "rooms:one",
-        oldState: SubscriptionState.Subscribing,
-        newState: SubscriptionState.Subscribed,
+        recoverable: false,
+        positioned: false,
+        wasRecovering: false,
+        recovered: false,
+        hasRecoveredPublications: false,
       });
     });
-    expect(result.current.status).toEqual({ state: "subscribed", error: null });
+    expect(result.current.status).toEqual({
+      state: "subscribed",
+      error: null,
+      recovered: false,
+    });
     rerender({ enabled: false });
     expect(result.current.status).toEqual({
       state: "detached",
       error: null,
+      recovered: false,
     });
     rerender({ enabled: true });
     expect(requireSubscription(result.current.client)).not.toBe(subscription);
@@ -338,7 +348,7 @@ describe("provider and subscriptions", () => {
     expect(client.subscriptions()).toEqual({});
   });
 
-  test("client listeners see the initial transition and subscription listeners expose recovery metadata", () => {
+  test("native listeners receive client transitions and subscription recovery metadata", () => {
     const onClientState = vi.fn();
     const onSubscribed = vi.fn();
     const { result } = renderHook(
@@ -349,9 +359,17 @@ describe("provider and subscriptions", () => {
       },
       { wrapper },
     );
+    // Listeners attach after the session starts, so they see the transitions
+    // that follow, not the one that started the connection.
+    act(() => {
+      requireClient(result.current).emit("state", {
+        oldState: State.Connecting,
+        newState: State.Connected,
+      });
+    });
     expect(onClientState).toHaveBeenCalledWith({
-      oldState: "disconnected",
-      newState: "connecting",
+      oldState: "connecting",
+      newState: "connected",
     });
     act(() => {
       requireSubscription(result.current).emit("subscribed", {
@@ -370,7 +388,7 @@ describe("provider and subscriptions", () => {
 });
 
 describe("parsing and typed events", () => {
-  test("the provider supplies fresh token callbacks without replacing the subscription", async () => {
+  test("a session reads its subscription options once, and a new session reads them again", async () => {
     const createSubscription = vi.spyOn(
       Centrifuge.prototype,
       "newSubscription",
@@ -381,24 +399,38 @@ describe("parsing and typed events", () => {
       useChannel("rooms:one", () => {});
       return null;
     };
-    const View = ({ getToken }: { getToken: () => Promise<string> }) => (
+    const View = ({
+      sessionId,
+      getToken,
+    }: {
+      sessionId: string;
+      getToken: () => Promise<string>;
+    }) => (
       <CentrifugeProvider
         configuration={{
           ...configuration,
+          session: { id: sessionId },
           getSubscriptionOptions: () => ({ getToken }),
         }}
       >
         <Listener />
       </CentrifugeProvider>
     );
-    const view = render(<View getToken={firstToken} />);
-    const options = createSubscription.mock.calls[0]?.[1];
-    expect(await options?.getToken?.({ channel: "rooms:one" })).toBe("first");
-    view.rerender(<View getToken={secondToken} />);
-    expect(await options?.getToken?.({ channel: "rooms:one" })).toBe("second");
+    const view = render(<View sessionId="first" getToken={firstToken} />);
+    const started = createSubscription.mock.calls[0]?.[1];
+    expect(await started?.getToken?.({ channel: "rooms:one" })).toBe("first");
+
+    // A render that only passes a new callback leaves the session alone.
+    view.rerender(<View sessionId="first" getToken={secondToken} />);
     expect(createSubscription).toHaveBeenCalledTimes(1);
-    expect(firstToken).toHaveBeenCalledTimes(1);
-    expect(secondToken).toHaveBeenCalledTimes(1);
+    expect(await started?.getToken?.({ channel: "rooms:one" })).toBe("first");
+
+    // A new session builds its client from the configuration of that render.
+    view.rerender(<View sessionId="second" getToken={secondToken} />);
+    const restarted = createSubscription.mock.calls[1]?.[1];
+    expect(await restarted?.getToken?.({ channel: "rooms:one" })).toBe(
+      "second",
+    );
   });
 
   test("parser failures and rejected handlers are reported without interrupting sibling delivery", async () => {
