@@ -206,9 +206,10 @@ const Application = () => {
     const active = [...clients].filter(
       (client) => client.state !== "disconnected",
     );
+    // Centrifuge installs its own `error` handler on every subscription and
+    // keeps it after `removeSubscription`, so it is counted separately below.
     const subscriptionEvents: Array<keyof SubscriptionEvents> = [
       "state",
-      "error",
       "publication",
       "subscribed",
       "subscribing",
@@ -238,11 +239,12 @@ const Application = () => {
           ),
         releasedSubscriptionListeners: [...subscriptions]
           .filter((subscription) => subscription.state === "unsubscribed")
-          .map((subscription) =>
-            subscriptionEvents.reduce(
-              (total, event) => total + subscription.listeners(event).length,
-              0,
-            ),
+          .map(
+            (subscription) =>
+              subscriptionEvents.reduce(
+                (total, event) => total + subscription.listeners(event).length,
+                0,
+              ) + Math.max(subscription.listeners("error").length - 1, 0),
           ),
       }),
     );
