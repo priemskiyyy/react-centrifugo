@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { act, cleanup, render, renderHook } from "@testing-library/react";
-import { Centrifuge, State, SubscriptionState } from "centrifuge";
+import { Centrifuge, State } from "centrifuge";
 import { StrictMode } from "react";
 import type { PropsWithChildren } from "react";
 import { afterEach, beforeEach, describe, expect, test, vi } from "vitest";
