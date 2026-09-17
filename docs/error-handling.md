@@ -40,8 +40,7 @@ const reason =
     : null;
 ```
 
-The React example shows the same narrowing. The error stays set until the
-channel subscribes successfully.
+The error stays set until the channel subscribes successfully.
 
 ## Reconnects
 
