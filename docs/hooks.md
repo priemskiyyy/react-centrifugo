@@ -102,7 +102,7 @@ useSubscriptionEvent("rooms:demo", "subscribed", handleSubscribed);
 ```
 
 For the recovery outcome alone, `useChannelStatus(channel).recovered` is
-simpler. Reach for this hook when you need the SDK's own context.
+simpler. Use this hook for the SDK's own context.
 
 ## useClientEvent
 

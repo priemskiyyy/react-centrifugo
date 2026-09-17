@@ -49,8 +49,7 @@ subscriptions or lose recovery positions, and nothing in this library reacts to
 connection events by disposing anything. When the socket comes back, the
 existing subscriptions resume.
 
-This library never stores publications and guarantees no delivery. It is a
-transport binding, not a cache.
+This library never stores publications and guarantees no delivery.
 
 ## Recovering missed publications
 

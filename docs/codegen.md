@@ -18,8 +18,9 @@ useMessageCreated("rooms:demo", (message) => console.log(message.text));
 
 ## When to generate hooks
 
-`useChannelEvent(channel, "message.created", handler)` already works and is
-fully typed. Generated hooks provide named imports for those calls:
+`useChannelEvent(channel, "message.created", handler)` already works, with its
+channel and payload types taken from the event map. Generated hooks provide
+named imports for those calls:
 
 - `useMessageCreated` keeps the event map's channel and payload constraints.
 - Payload types reference `Events["message.created"]["payload"]`; edits to

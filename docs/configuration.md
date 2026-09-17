@@ -42,7 +42,7 @@ inactive snapshots. Re-enabling builds a fresh session.
 Passing a new object literal every render does **not** reconnect. Only
 `session.id` and `session.enabled` do.
 
-## What is read when
+## When configuration is read
 
 The configuration is read when a session starts. The client keeps the
 `transport`, `options`, and `getSubscriptionOptions` of that render until the

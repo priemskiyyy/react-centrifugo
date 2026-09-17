@@ -2,7 +2,7 @@
 
 A dashboard on four shared channels: a room, metrics, alerts, and deploys. Six
 generated event hooks read one envelope shape, every payload is parsed with Zod,
-and the Simulcast devtools panel is mounted so you can watch the subscriptions.
+and the Simulcast devtools panel is mounted.
 
 ```sh
 pnpm --filter example-react dev

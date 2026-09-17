@@ -6,8 +6,6 @@ description: Centrifugo hooks for React. The native SDK surface on top of the si
 
 # React Centrifugo
 
-**Centrifugo hooks for React.**
-
 This package builds a Centrifugo client from one configuration object and hands
 its native SDK surface to React. Subscription ownership, sharing, and cleanup
 come from [simulcast](https://priemskiyyy.github.io/simulcast/) and its

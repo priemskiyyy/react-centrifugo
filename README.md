@@ -2,7 +2,7 @@
 
 Centrifugo hooks for [React](https://react.dev/). The provider builds a client from one configuration object and hands Centrifugo's native SDK surface to React. Subscription ownership, sharing, and cleanup come from [simulcast](https://priemskiyyy.github.io/simulcast/) and its Centrifugo adapter, so the channel hooks are that runtime's own, re-exported here unchanged.
 
-Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`. Two shared tools work here: `@priemskiyyy/simulcast-codegen` generates named hooks from your event map, and `@priemskiyyy/simulcast-devtools` adds a browser panel for connections, channels, and events.
+Requires React `>=19.2 <20` and Centrifuge JS `>=5.7.2 <6`.
 
 ## Usage
 
@@ -103,7 +103,7 @@ pnpm install --frozen-lockfile
 pnpm check
 ```
 
-`pnpm check` builds the package and checks types, lint, formatting, unit tests, generated files, the example app, and an isolated package consumer.
+`pnpm check` builds the package and checks types, lint, formatting, unit tests, generated files, the example apps, and an isolated package consumer.
 
 For browser tests, start Docker and install the test browsers:
 
